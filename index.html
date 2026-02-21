@@ -22,39 +22,39 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--tg-theme-bg-color, #f8fafc);
             color: var(--tg-theme-text-color, #1e293b);
-            padding: 16px;
+            padding: 12px;
             min-height: 100vh;
+            padding-bottom: 70px;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
-            padding-bottom: 80px;
         }
         
         /* Header */
         .header {
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         h1 {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             margin-bottom: 4px;
             color: var(--tg-theme-text-color, #1e293b);
         }
         
         .subtitle {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--tg-theme-hint-color, #64748b);
         }
         
         /* Filters */
         .filters {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            grid-template-columns: 1fr;
             gap: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         
         .filter-group {
@@ -67,7 +67,7 @@
             font-weight: 700;
             color: var(--tg-theme-hint-color, #94a3b8);
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             letter-spacing: 0.5px;
         }
         
@@ -114,47 +114,51 @@
             color: var(--tg-theme-hint-color, #64748b);
         }
         
-        /* Empty State */
-        .empty-state {
+        /* Empty/Error States */
+        .empty-state, .error-state {
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 300px;
+            min-height: 250px;
             text-align: center;
-            padding: 40px 20px;
+            padding: 30px 20px;
         }
         
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 16px;
+        .empty-icon, .error-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
             opacity: 0.5;
         }
         
         .empty-text {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         
         .empty-hint {
-            font-size: 14px;
+            font-size: 13px;
             color: var(--tg-theme-hint-color, #64748b);
+        }
+        
+        .error-state {
+            color: #ef4444;
         }
         
         /* KPI Cards */
         .kpi-grid {
             display: none;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
         }
         
         .kpi-card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
-            padding: 16px;
-            border-radius: 12px;
-            border-left: 4px solid;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 3px solid;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
@@ -163,65 +167,123 @@
         .kpi-card.purple { border-color: #8b5cf6; }
         
         .kpi-label {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: 600;
             color: var(--tg-theme-hint-color, #64748b);
             text-transform: uppercase;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             letter-spacing: 0.3px;
         }
         
         .kpi-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: 700;
             color: var(--tg-theme-text-color, #1e293b);
+            word-break: break-all;
         }
         
-        /* Charts */
-        .charts-grid {
+        /* Chart Section */
+        .chart-section {
             display: none;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
-        }
-        
-        @media (min-width: 768px) {
-            .charts-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+            margin-bottom: 16px;
         }
         
         .chart-card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 12px;
         }
         
         .chart-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             color: var(--tg-theme-text-color, #1e293b);
         }
         
         .chart-wrapper {
-            height: 280px;
+            height: 240px;
             position: relative;
         }
         
-        /* Table */
-        .table-card {
+        /* Category List with Percentages */
+        .category-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-top: 12px;
+        }
+        
+        .category-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 12px;
+            background: var(--tg-theme-bg-color, #f8fafc);
+            border-radius: 8px;
+        }
+        
+        .category-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .category-color {
+            width: 14px;
+            height: 14px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+        
+        .category-name {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--tg-theme-text-color, #1e293b);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .category-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            flex-shrink: 0;
+            margin-left: 8px;
+        }
+        
+        .category-amount {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--tg-theme-text-color, #1e293b);
+        }
+        
+        .category-percentage {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin-top: 2px;
+        }
+        
+        /* Transaction Table */
+        .table-section {
             display: none;
+            margin-bottom: 16px;
+        }
+        
+        .table-card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
         }
         
         .table-header {
-            padding: 16px 20px;
+            padding: 12px 16px;
             border-bottom: 1px solid var(--tg-theme-hint-color, #e2e8f0);
             display: flex;
             justify-content: space-between;
@@ -229,79 +291,64 @@
         }
         
         .table-header h2 {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
         }
         
         .filter-status {
-            font-size: 11px;
+            font-size: 10px;
             background: var(--tg-theme-bg-color, #f1f5f9);
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 6px;
             color: var(--tg-theme-hint-color, #64748b);
         }
         
-        .table-wrapper {
-            overflow-x: auto;
+        .transaction-list {
+            max-height: 400px;
+            overflow-y: auto;
         }
         
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        
-        thead {
-            background: var(--tg-theme-bg-color, #f8fafc);
-        }
-        
-        th {
+        .transaction-item {
             padding: 12px 16px;
-            text-align: left;
-            font-size: 11px;
+            border-bottom: 1px solid var(--tg-theme-hint-color, #f1f5f9);
+        }
+        
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+        
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+        
+        .transaction-category {
+            font-size: 14px;
             font-weight: 600;
-            color: var(--tg-theme-hint-color, #64748b);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        th.text-right {
-            text-align: right;
-        }
-        
-        td {
-            padding: 12px 16px;
-            font-size: 13px;
-            border-top: 1px solid var(--tg-theme-hint-color, #f1f5f9);
-        }
-        
-        td.text-right {
-            text-align: right;
-        }
-        
-        tbody tr:hover {
-            background: var(--tg-theme-bg-color, #f8fafc);
-        }
-        
-        .category-name {
-            font-weight: 500;
             color: var(--tg-theme-text-color, #1e293b);
         }
         
-        .description {
-            color: var(--tg-theme-hint-color, #64748b);
+        .transaction-amount-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
         }
         
-        .amount {
+        .transaction-amount {
+            font-size: 15px;
             font-weight: 700;
             color: var(--tg-theme-text-color, #1e293b);
         }
         
         .currency-badge {
             display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
             font-weight: 700;
+            margin-top: 2px;
         }
         
         .currency-badge.egp {
@@ -319,40 +366,84 @@
             color: #6b21a8;
         }
         
+        .transaction-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .transaction-description {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #64748b);
+            flex: 1;
+        }
+        
+        .transaction-date {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #94a3b8);
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        
         /* Close Button */
         .close-button {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
-            padding: 16px;
+            padding: 14px;
             background: var(--tg-theme-button-color, #3390ec);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: opacity 0.2s;
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
         }
         
         .close-button:active {
             opacity: 0.8;
         }
         
-        /* Error State */
-        .error-state {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            padding: 40px 20px;
-            color: #ef4444;
+        /* Tablet & Desktop Adjustments */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+                padding-bottom: 80px;
+            }
+            
+            .container {
+                max-width: 768px;
+            }
+            
+            h1 {
+                font-size: 26px;
+            }
+            
+            .filters {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
+            
+            .kpi-grid {
+                gap: 12px;
+            }
+            
+            .kpi-value {
+                font-size: 22px;
+            }
+            
+            .chart-wrapper {
+                height: 300px;
+            }
         }
         
-        .error-icon {
-            font-size: 48px;
-            margin-bottom: 16px;
+        @media (min-width: 1024px) {
+            .container {
+                max-width: 1024px;
+            }
         }
     </style>
 </head>
@@ -361,7 +452,7 @@
         <!-- Header -->
         <div class="header">
             <h1>💰 Expense Dashboard</h1>
-            <p class="subtitle">Your comprehensive spending analytics</p>
+            <p class="subtitle">Your spending analytics</p>
         </div>
         
         <!-- Filters -->
@@ -389,13 +480,13 @@
         <!-- Loading State -->
         <div class="loading-container" id="loadingState">
             <div class="spinner"></div>
-            <div class="loading-text">Loading your expenses...</div>
+            <div class="loading-text">Loading expenses...</div>
         </div>
         
         <!-- Empty State -->
         <div class="empty-state" id="emptyState">
             <div class="empty-icon">📊</div>
-            <div class="empty-text">No expenses recorded yet</div>
+            <div class="empty-text">No expenses yet</div>
             <div class="empty-hint">Start tracking by sending expenses to your bot!</div>
         </div>
         
@@ -409,11 +500,11 @@
         <!-- KPI Cards -->
         <div class="kpi-grid" id="kpiGrid">
             <div class="kpi-card blue">
-                <div class="kpi-label">Total USD</div>
-                <div class="kpi-value" id="totalUSD">$0.00</div>
+                <div class="kpi-label">Total</div>
+                <div class="kpi-value" id="totalUSD">$0</div>
             </div>
             <div class="kpi-card green">
-                <div class="kpi-label">Filtered Count</div>
+                <div class="kpi-label">Count</div>
                 <div class="kpi-value" id="filteredCount">0</div>
             </div>
             <div class="kpi-card purple">
@@ -422,43 +513,29 @@
             </div>
         </div>
         
-        <!-- Charts -->
-        <div class="charts-grid" id="chartsGrid">
+        <!-- Chart Section -->
+        <div class="chart-section" id="chartSection">
             <div class="chart-card">
                 <div class="chart-title">Spending by Category</div>
                 <div class="chart-wrapper">
                     <canvas id="categoryChart"></canvas>
                 </div>
-            </div>
-            <div class="chart-card">
-                <div class="chart-title">Currency Distribution</div>
-                <div class="chart-wrapper">
-                    <canvas id="currencyChart"></canvas>
+                <div class="category-list" id="categoryList">
+                    <!-- Populated by JS -->
                 </div>
             </div>
         </div>
         
         <!-- Transaction Table -->
-        <div class="table-card" id="tableCard">
-            <div class="table-header">
-                <h2>Transaction Details</h2>
-                <span class="filter-status" id="filterStatus">Loading...</span>
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Category</th>
-                            <th>Description</th>
-                            <th class="text-right">Amount</th>
-                            <th>Currency</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tableBody">
-                        <!-- JS will populate this -->
-                    </tbody>
-                </table>
+        <div class="table-section" id="tableSection">
+            <div class="table-card">
+                <div class="table-header">
+                    <h2>Transactions</h2>
+                    <span class="filter-status" id="filterStatus">Loading...</span>
+                </div>
+                <div class="transaction-list" id="transactionList">
+                    <!-- Populated by JS -->
+                </div>
             </div>
         </div>
     </div>
@@ -486,7 +563,6 @@
         let rawExpenses = [];
         let filteredExpenses = [];
         let categoryChart = null;
-        let currencyChart = null;
         
         // Fetch expense data from webhook
         async function loadExpenses() {
@@ -529,7 +605,7 @@
                 const opt = document.createElement('option');
                 opt.value = month;
                 const date = new Date(month + '-01');
-                opt.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+                opt.textContent = date.toLocaleString('default', { month: 'short', year: 'numeric' });
                 monthFilter.appendChild(opt);
             });
             
@@ -572,13 +648,13 @@
             });
             
             updateKPIs();
-            updateCharts();
-            updateTable();
+            updateChart();
+            updateTransactions();
             
             // Show UI elements
             document.getElementById('kpiGrid').style.display = 'grid';
-            document.getElementById('chartsGrid').style.display = 'grid';
-            document.getElementById('tableCard').style.display = 'block';
+            document.getElementById('chartSection').style.display = 'block';
+            document.getElementById('tableSection').style.display = 'block';
         }
         
         // Update KPI cards
@@ -596,16 +672,23 @@
             document.getElementById('categoryCount').textContent = categories.size;
         }
         
-        // Update charts
-        function updateCharts() {
+        // Update chart and category list
+        function updateChart() {
             // Category aggregation
             const categoryTotals = {};
-            const currencyTotals = {};
             
             filteredExpenses.forEach(expense => {
                 categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + (expense.amountUSD || 0);
-                currencyTotals[expense.currency] = (currencyTotals[expense.currency] || 0) + expense.amount;
             });
+            
+            // Sort by value
+            const sorted = Object.entries(categoryTotals)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10); // Top 10
+            
+            const labels = sorted.map(([cat]) => cat);
+            const values = sorted.map(([, val]) => val);
+            const total = values.reduce((a, b) => a + b, 0);
             
             // Category Chart
             if (categoryChart) categoryChart.destroy();
@@ -613,12 +696,11 @@
             categoryChart = new Chart(categoryCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(categoryTotals),
+                    labels: labels,
                     datasets: [{
-                        data: Object.values(categoryTotals),
+                        data: values,
                         backgroundColor: COLORS,
-                        borderWidth: 0,
-                        borderRadius: 4
+                        borderWidth: 0
                     }]
                 },
                 options: {
@@ -626,79 +708,84 @@
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'right',
-                            labels: {
-                                boxWidth: 12,
-                                usePointStyle: true,
-                                padding: 10,
-                                font: { size: 11 }
-                            }
+                            display: false
                         },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     const value = context.parsed;
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
                                     const percentage = ((value / total) * 100).toFixed(1);
                                     return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
                                 }
                             }
                         }
                     },
-                    cutout: '65%'
+                    cutout: '70%'
                 }
             });
             
-            // Currency Chart
-            if (currencyChart) currencyChart.destroy();
-            const currencyCtx = document.getElementById('currencyChart').getContext('2d');
-            currencyChart = new Chart(currencyCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(currencyTotals),
-                    datasets: [{
-                        label: 'Total',
-                        data: Object.values(currencyTotals),
-                        backgroundColor: COLORS,
-                        borderRadius: 8
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: { beginAtZero: true }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
+            // Update category list with percentages
+            const listContainer = document.getElementById('categoryList');
+            listContainer.innerHTML = '';
+            
+            sorted.forEach(([category, value], index) => {
+                const percentage = ((value / total) * 100).toFixed(1);
+                const color = COLORS[index % COLORS.length];
+                
+                const item = document.createElement('div');
+                item.className = 'category-item';
+                item.innerHTML = `
+                    <div class="category-left">
+                        <div class="category-color" style="background-color: ${color}"></div>
+                        <div class="category-name">${category}</div>
+                    </div>
+                    <div class="category-right">
+                        <div class="category-amount">$${value.toFixed(2)}</div>
+                        <div class="category-percentage">${percentage}%</div>
+                    </div>
+                `;
+                
+                listContainer.appendChild(item);
             });
         }
         
-        // Update transaction table
-        function updateTable() {
-            const tableBody = document.getElementById('tableBody');
-            tableBody.innerHTML = '';
+        // Update transaction list
+        function updateTransactions() {
+            const listContainer = document.getElementById('transactionList');
+            listContainer.innerHTML = '';
             
-            filteredExpenses.forEach(expense => {
+            // Sort by date (newest first)
+            const sorted = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date));
+            
+            sorted.forEach(expense => {
                 const currencyClass = expense.currency === 'EGP' ? 'egp' : 
                                      expense.currency === 'USD' ? 'usd' : 'other';
                 
-                const row = `
-                    <tr>
-                        <td>${expense.date}</td>
-                        <td class="category-name">${expense.category}</td>
-                        <td class="description">${expense.description}</td>
-                        <td class="amount text-right">${expense.amount.toLocaleString()}</td>
-                        <td><span class="currency-badge ${currencyClass}">${expense.currency}</span></td>
-                    </tr>
+                // Format date
+                const date = new Date(expense.date);
+                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                const item = document.createElement('div');
+                item.className = 'transaction-item';
+                item.innerHTML = `
+                    <div class="transaction-header">
+                        <div class="transaction-category">${expense.category}</div>
+                        <div class="transaction-amount-wrapper">
+                            <div class="transaction-amount">${expense.amount.toLocaleString()}</div>
+                            <span class="currency-badge ${currencyClass}">${expense.currency}</span>
+                        </div>
+                    </div>
+                    <div class="transaction-details">
+                        <div class="transaction-description">${expense.description}</div>
+                        <div class="transaction-date">${formattedDate}</div>
+                    </div>
                 `;
-                tableBody.innerHTML += row;
+                
+                listContainer.appendChild(item);
             });
             
             document.getElementById('filterStatus').textContent = 
-                `Showing ${filteredExpenses.length} of ${rawExpenses.length} transactions`;
+                `${filteredExpenses.length} of ${rawExpenses.length}`;
         }
         
         // Load data on page load
