@@ -32,7 +32,6 @@
             margin: 0 auto;
         }
         
-        /* Header */
         .header {
             margin-bottom: 16px;
         }
@@ -49,7 +48,28 @@
             color: var(--tg-theme-hint-color, #64748b);
         }
         
-        /* Filters */
+        .user-info {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin-top: 4px;
+            padding: 6px 10px;
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+            border-radius: 6px;
+            display: inline-block;
+        }
+        
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            color: #10b981;
+            background: #d1fae5;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-top: 6px;
+        }
+        
         .filters {
             display: grid;
             grid-template-columns: 1fr;
@@ -86,7 +106,6 @@
             cursor: pointer;
         }
         
-        /* Loading Spinner */
         .loading-container {
             display: flex;
             flex-direction: column;
@@ -114,7 +133,6 @@
             color: var(--tg-theme-hint-color, #64748b);
         }
         
-        /* Empty/Error States */
         .empty-state, .error-state {
             display: none;
             flex-direction: column;
@@ -146,7 +164,6 @@
             color: #ef4444;
         }
         
-        /* KPI Cards */
         .kpi-grid {
             display: none;
             grid-template-columns: repeat(3, 1fr);
@@ -182,7 +199,6 @@
             word-break: break-all;
         }
         
-        /* Chart Section */
         .chart-section {
             display: none;
             margin-bottom: 16px;
@@ -208,7 +224,6 @@
             position: relative;
         }
         
-        /* Category List with Percentages */
         .category-list {
             display: flex;
             flex-direction: column;
@@ -269,7 +284,6 @@
             margin-top: 2px;
         }
         
-        /* Transaction Table */
         .table-section {
             display: none;
             margin-bottom: 16px;
@@ -385,7 +399,6 @@
             white-space: nowrap;
         }
         
-        /* Close Button */
         .close-button {
             position: fixed;
             bottom: 0;
@@ -407,7 +420,6 @@
             opacity: 0.8;
         }
         
-        /* Tablet & Desktop Adjustments */
         @media (min-width: 768px) {
             body {
                 padding: 20px;
@@ -449,13 +461,16 @@
 </head>
 <body>
     <div class="container">
-        <!-- Header -->
         <div class="header">
             <h1>💰 Expense Dashboard</h1>
-            <p class="subtitle">Your spending analytics</p>
+            <p class="subtitle">Your personal spending analytics</p>
+            <div class="user-info" id="userInfo">Loading user...</div>
+            <div class="security-badge">
+                <span>🔒</span>
+                <span>Telegram Verified</span>
+            </div>
         </div>
         
-        <!-- Filters -->
         <div class="filters" id="filtersContainer" style="display: none;">
             <div class="filter-group">
                 <label class="filter-label">Month</label>
@@ -477,27 +492,23 @@
             </div>
         </div>
         
-        <!-- Loading State -->
         <div class="loading-container" id="loadingState">
             <div class="spinner"></div>
-            <div class="loading-text">Loading expenses...</div>
+            <div class="loading-text">Securely loading your expenses...</div>
         </div>
         
-        <!-- Empty State -->
         <div class="empty-state" id="emptyState">
             <div class="empty-icon">📊</div>
             <div class="empty-text">No expenses yet</div>
             <div class="empty-hint">Start tracking by sending expenses to your bot!</div>
         </div>
         
-        <!-- Error State -->
         <div class="error-state" id="errorState">
             <div class="error-icon">⚠️</div>
             <div class="empty-text">Could not load expenses</div>
-            <div class="empty-hint">Please try again later</div>
+            <div class="empty-hint" id="errorMessage">Please try again later</div>
         </div>
         
-        <!-- KPI Cards -->
         <div class="kpi-grid" id="kpiGrid">
             <div class="kpi-card blue">
                 <div class="kpi-label">Total</div>
@@ -513,34 +524,27 @@
             </div>
         </div>
         
-        <!-- Chart Section -->
         <div class="chart-section" id="chartSection">
             <div class="chart-card">
                 <div class="chart-title">Spending by Category</div>
                 <div class="chart-wrapper">
                     <canvas id="categoryChart"></canvas>
                 </div>
-                <div class="category-list" id="categoryList">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="category-list" id="categoryList"></div>
             </div>
         </div>
         
-        <!-- Transaction Table -->
         <div class="table-section" id="tableSection">
             <div class="table-card">
                 <div class="table-header">
                     <h2>Transactions</h2>
                     <span class="filter-status" id="filterStatus">Loading...</span>
                 </div>
-                <div class="transaction-list" id="transactionList">
-                    <!-- Populated by JS -->
-                </div>
+                <div class="transaction-list" id="transactionList"></div>
             </div>
         </div>
     </div>
     
-    <!-- Close Button -->
     <button class="close-button" onclick="window.Telegram.WebApp.close()">
         Close Dashboard
     </button>
@@ -551,10 +555,21 @@
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Production webhook URL
-        const WEBHOOK_URL = 'https://n8n.doktorautomata.shop/webhook/expense-dashboard';
+        // Get Telegram authentication data
+        const initData = tg.initData;
+        const telegramUser = tg.initDataUnsafe?.user;
+        const currentUsername = telegramUser?.username || telegramUser?.first_name || 'Unknown';
         
-        // Chart.js color palette
+        // Display user info
+        document.getElementById('userInfo').textContent = `👤 ${currentUsername}`;
+        
+        // CRITICAL: Pass Telegram's initData for authentication
+        const WEBHOOK_URL = `https://n8n.doktorautomata.shop/webhook/expense-dashboard?initData=${encodeURIComponent(initData)}`;
+        
+        console.log('Telegram user:', telegramUser);
+        console.log('InitData present:', initData ? 'Yes' : 'No');
+        console.log('Authenticated as:', currentUsername);
+        
         const COLORS = [
             '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
             '#ec4899', '#64748b', '#06b6d4', '#84cc16', '#f97316'
@@ -564,9 +579,9 @@
         let filteredExpenses = [];
         let categoryChart = null;
         
-        // Fetch expense data from webhook
         async function loadExpenses() {
             try {
+                console.log('Fetching authenticated data...');
                 const response = await fetch(WEBHOOK_URL);
                 
                 if (!response.ok) {
@@ -574,9 +589,18 @@
                 }
                 
                 const data = await response.json();
+                console.log('Received data:', data);
+                
                 const expenseData = Array.isArray(data) ? data[0] : data;
                 
                 document.getElementById('loadingState').style.display = 'none';
+                
+                // Check for authentication error
+                if (expenseData.error) {
+                    document.getElementById('errorState').style.display = 'flex';
+                    document.getElementById('errorMessage').textContent = expenseData.error;
+                    return;
+                }
                 
                 if (expenseData.isEmpty || !expenseData.rawExpenses || expenseData.rawExpenses.length === 0) {
                     document.getElementById('emptyState').style.display = 'flex';
@@ -594,7 +618,6 @@
             }
         }
         
-        // Populate filter dropdowns
         function populateFilters() {
             const months = [...new Set(rawExpenses.map(e => e.date.substring(0, 7)))].sort().reverse();
             const categories = [...new Set(rawExpenses.map(e => e.category))].sort();
@@ -627,19 +650,16 @@
             
             document.getElementById('filtersContainer').style.display = 'grid';
             
-            // Add event listeners
             monthFilter.addEventListener('change', updateDashboard);
             categoryFilter.addEventListener('change', updateDashboard);
             currencyFilter.addEventListener('change', updateDashboard);
         }
         
-        // Update dashboard with filtered data
         function updateDashboard() {
             const monthVal = document.getElementById('monthFilter').value;
             const categoryVal = document.getElementById('categoryFilter').value;
             const currencyVal = document.getElementById('currencyFilter').value;
             
-            // Filter data
             filteredExpenses = rawExpenses.filter(expense => {
                 const monthMatch = monthVal === 'all' || expense.date.startsWith(monthVal);
                 const categoryMatch = categoryVal === 'all' || expense.category === categoryVal;
@@ -651,13 +671,11 @@
             updateChart();
             updateTransactions();
             
-            // Show UI elements
             document.getElementById('kpiGrid').style.display = 'grid';
             document.getElementById('chartSection').style.display = 'block';
             document.getElementById('tableSection').style.display = 'block';
         }
         
-        // Update KPI cards
         function updateKPIs() {
             let totalUSD = 0;
             const categories = new Set();
@@ -672,25 +690,21 @@
             document.getElementById('categoryCount').textContent = categories.size;
         }
         
-        // Update chart and category list
         function updateChart() {
-            // Category aggregation
             const categoryTotals = {};
             
             filteredExpenses.forEach(expense => {
                 categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + (expense.amountUSD || 0);
             });
             
-            // Sort by value
             const sorted = Object.entries(categoryTotals)
                 .sort((a, b) => b[1] - a[1])
-                .slice(0, 10); // Top 10
+                .slice(0, 10);
             
             const labels = sorted.map(([cat]) => cat);
             const values = sorted.map(([, val]) => val);
             const total = values.reduce((a, b) => a + b, 0);
             
-            // Category Chart
             if (categoryChart) categoryChart.destroy();
             const categoryCtx = document.getElementById('categoryChart').getContext('2d');
             categoryChart = new Chart(categoryCtx, {
@@ -707,9 +721,7 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -724,7 +736,6 @@
                 }
             });
             
-            // Update category list with percentages
             const listContainer = document.getElementById('categoryList');
             listContainer.innerHTML = '';
             
@@ -749,19 +760,16 @@
             });
         }
         
-        // Update transaction list
         function updateTransactions() {
             const listContainer = document.getElementById('transactionList');
             listContainer.innerHTML = '';
             
-            // Sort by date (newest first)
             const sorted = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date));
             
             sorted.forEach(expense => {
                 const currencyClass = expense.currency === 'EGP' ? 'egp' : 
                                      expense.currency === 'USD' ? 'usd' : 'other';
                 
-                // Format date
                 const date = new Date(expense.date);
                 const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                 
@@ -788,7 +796,6 @@
                 `${filteredExpenses.length} of ${rawExpenses.length}`;
         }
         
-        // Load data on page load
         loadExpenses();
     </script>
 </body>
