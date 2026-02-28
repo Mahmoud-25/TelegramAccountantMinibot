@@ -1,14 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>💰 Expense Dashboard</title>
+    <title>💰 لوحة المصروفات</title>
     
-    <!-- Telegram Web App Script -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
-    <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <style>
@@ -19,12 +16,21 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Cairo', sans-serif;
             background-color: var(--tg-theme-bg-color, #f8fafc);
             color: var(--tg-theme-text-color, #1e293b);
             padding: 12px;
             min-height: 100vh;
-            padding-bottom: 70px;
+            padding-bottom: 140px;
+        }
+        
+        /* RTL/LTR Support */
+        body[dir="ltr"] {
+            text-align: left;
+        }
+        
+        body[dir="rtl"] {
+            text-align: right;
         }
         
         .container {
@@ -32,15 +38,33 @@
             margin: 0 auto;
         }
         
+        /* Header */
         .header {
             margin-bottom: 16px;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
         }
         
         h1 {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 4px;
-            color: var(--tg-theme-text-color, #1e293b);
+        }
+        
+        .lang-switch {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
         }
         
         .subtitle {
@@ -58,60 +82,15 @@
             display: inline-block;
         }
         
-        .security-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            color: #10b981;
-            background: #d1fae5;
-            padding: 4px 8px;
-            border-radius: 6px;
-            margin-top: 6px;
-        }
-        
-        .filters {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .filter-label {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--tg-theme-hint-color, #94a3b8);
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            letter-spacing: 0.5px;
-        }
-        
-        select {
-            background: var(--tg-theme-secondary-bg-color, #ffffff);
-            color: var(--tg-theme-text-color, #1e293b);
-            border: 1px solid var(--tg-theme-hint-color, #e2e8f0);
-            border-radius: 8px;
-            padding: 10px 32px 10px 12px;
-            font-size: 14px;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-repeat: no-repeat;
-            background-position: right 8px center;
-            background-size: 20px;
-            cursor: pointer;
-        }
-        
-        .loading-container {
-            display: flex;
+        /* Loading/Empty/Error States */
+        .loading-container, .empty-state, .error-state {
+            display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 300px;
+            min-height: 250px;
+            text-align: center;
+            padding: 30px 20px;
             gap: 16px;
         }
         
@@ -128,45 +107,42 @@
             to { transform: rotate(360deg); }
         }
         
-        .loading-text {
-            font-size: 14px;
-            color: var(--tg-theme-hint-color, #64748b);
-        }
-        
-        .empty-state, .error-state {
-            display: none;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 250px;
-            text-align: center;
-            padding: 30px 20px;
-        }
-        
         .empty-icon, .error-icon {
             font-size: 48px;
-            margin-bottom: 12px;
             opacity: 0.5;
         }
         
-        .empty-text {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 6px;
+        /* Filters */
+        .filters {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 16px;
         }
         
-        .empty-hint {
-            font-size: 13px;
-            color: var(--tg-theme-hint-color, #64748b);
+        .filter-label {
+            font-size: 10px;
+            font-weight: 700;
+            color: var(--tg-theme-hint-color, #94a3b8);
+            text-transform: uppercase;
+            margin-bottom: 4px;
         }
         
-        .error-state {
-            color: #ef4444;
+        select {
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #1e293b);
+            border: 1px solid var(--tg-theme-hint-color, #e2e8f0);
+            border-radius: 8px;
+            padding: 10px 32px 10px 12px;
+            font-size: 14px;
+            width: 100%;
+            cursor: pointer;
         }
         
+        /* KPI Cards */
         .kpi-grid {
             display: none;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-bottom: 16px;
         }
@@ -179,8 +155,14 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
         
+        body[dir="rtl"] .kpi-card {
+            border-left: none;
+            border-right: 3px solid;
+        }
+        
         .kpi-card.blue { border-color: #3b82f6; }
         .kpi-card.green { border-color: #10b981; }
+        .kpi-card.red { border-color: #ef4444; }
         .kpi-card.purple { border-color: #8b5cf6; }
         
         .kpi-label {
@@ -189,16 +171,15 @@
             color: var(--tg-theme-hint-color, #64748b);
             text-transform: uppercase;
             margin-bottom: 4px;
-            letter-spacing: 0.3px;
         }
         
         .kpi-value {
             font-size: 18px;
             font-weight: 700;
             color: var(--tg-theme-text-color, #1e293b);
-            word-break: break-all;
         }
         
+        /* Chart */
         .chart-section {
             display: none;
             margin-bottom: 16px;
@@ -209,19 +190,16 @@
             padding: 16px;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            margin-bottom: 12px;
         }
         
         .chart-title {
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 12px;
-            color: var(--tg-theme-text-color, #1e293b);
         }
         
         .chart-wrapper {
             height: 240px;
-            position: relative;
         }
         
         .category-list {
@@ -245,45 +223,35 @@
             align-items: center;
             gap: 10px;
             flex: 1;
-            min-width: 0;
         }
         
         .category-color {
             width: 14px;
             height: 14px;
             border-radius: 3px;
-            flex-shrink: 0;
-        }
-        
-        .category-name {
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--tg-theme-text-color, #1e293b);
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
         }
         
         .category-right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            flex-shrink: 0;
-            margin-left: 8px;
+        }
+        
+        body[dir="rtl"] .category-right {
+            align-items: flex-start;
         }
         
         .category-amount {
             font-size: 14px;
             font-weight: 700;
-            color: var(--tg-theme-text-color, #1e293b);
         }
         
         .category-percentage {
             font-size: 11px;
             color: var(--tg-theme-hint-color, #64748b);
-            margin-top: 2px;
         }
         
+        /* Transactions */
         .table-section {
             display: none;
             margin-bottom: 16px;
@@ -314,7 +282,6 @@
             background: var(--tg-theme-bg-color, #f1f5f9);
             padding: 3px 8px;
             border-radius: 6px;
-            color: var(--tg-theme-hint-color, #64748b);
         }
         
         .transaction-list {
@@ -327,21 +294,15 @@
             border-bottom: 1px solid var(--tg-theme-hint-color, #f1f5f9);
         }
         
-        .transaction-item:last-child {
-            border-bottom: none;
-        }
-        
         .transaction-header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
             margin-bottom: 6px;
         }
         
         .transaction-category {
             font-size: 14px;
             font-weight: 600;
-            color: var(--tg-theme-text-color, #1e293b);
         }
         
         .transaction-amount-wrapper {
@@ -350,10 +311,13 @@
             align-items: flex-end;
         }
         
+        body[dir="rtl"] .transaction-amount-wrapper {
+            align-items: flex-start;
+        }
+        
         .transaction-amount {
             font-size: 15px;
             font-weight: 700;
-            color: var(--tg-theme-text-color, #1e293b);
         }
         
         .currency-badge {
@@ -375,86 +339,65 @@
             color: #065f46;
         }
         
-        .currency-badge.other {
-            background: #f3e8ff;
-            color: #6b21a8;
+        .currency-badge.income {
+            background: #d1fae5;
+            color: #065f46;
         }
         
         .transaction-details {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-        }
-        
-        .transaction-description {
             font-size: 12px;
             color: var(--tg-theme-hint-color, #64748b);
-            flex: 1;
         }
         
-        .transaction-date {
+        .transaction-store {
+            font-style: italic;
+            margin-top: 4px;
             font-size: 11px;
-            color: var(--tg-theme-hint-color, #94a3b8);
-            margin-left: 8px;
-            white-space: nowrap;
         }
         
-        .close-button {
+        /* Bottom Buttons */
+        .bottom-buttons {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+            background: var(--tg-theme-bg-color, #ffffff);
+            padding: 12px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .export-button, .close-button {
+            flex: 1;
             padding: 14px;
-            background: var(--tg-theme-button-color, #3390ec);
-            color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
+            border-radius: 10px;
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
-            transition: opacity 0.2s;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
-            z-index: 100;
         }
         
-        .close-button:active {
-            opacity: 0.8;
+        .export-button {
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+            color: var(--tg-theme-text-color, #1e293b);
+        }
+        
+        .close-button {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
         }
         
         @media (min-width: 768px) {
-            body {
-                padding: 20px;
-                padding-bottom: 80px;
-            }
-            
-            .container {
-                max-width: 768px;
-            }
-            
-            h1 {
-                font-size: 26px;
+            .kpi-grid {
+                grid-template-columns: repeat(4, 1fr);
             }
             
             .filters {
                 grid-template-columns: repeat(3, 1fr);
-                gap: 10px;
-            }
-            
-            .kpi-grid {
-                gap: 12px;
-            }
-            
-            .kpi-value {
-                font-size: 22px;
-            }
-            
-            .chart-wrapper {
-                height: 300px;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .container {
-                max-width: 1024px;
             }
         }
     </style>
@@ -462,71 +405,74 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>💰 Expense Dashboard</h1>
-            <p class="subtitle">Your personal spending analytics</p>
-            <div class="user-info" id="userInfo">Loading user...</div>
-            <div class="security-badge">
-                <span>🔒</span>
-                <span>Telegram Verified</span>
+            <div class="header-top">
+                <h1 id="title">💰 لوحة المصروفات</h1>
+                <button class="lang-switch" onclick="toggleLanguage()">English</button>
             </div>
+            <p class="subtitle" id="subtitle">تحليلات إنفاقك الشخصية</p>
+            <div class="user-info" id="userInfo">جاري التحميل...</div>
         </div>
         
         <div class="filters" id="filtersContainer" style="display: none;">
             <div class="filter-group">
-                <label class="filter-label">Month</label>
+                <label class="filter-label" id="label-month">الشهر</label>
                 <select id="monthFilter">
-                    <option value="all">All Months</option>
+                    <option value="all" data-ar="كل الشهور" data-en="All Months">كل الشهور</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Category</label>
+                <label class="filter-label" id="label-category">الفئة</label>
                 <select id="categoryFilter">
-                    <option value="all">All Categories</option>
+                    <option value="all" data-ar="كل الفئات" data-en="All Categories">كل الفئات</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label class="filter-label">Currency</label>
+                <label class="filter-label" id="label-currency">العملة</label>
                 <select id="currencyFilter">
-                    <option value="all">All Currencies</option>
+                    <option value="all" data-ar="كل العملات" data-en="All Currencies">كل العملات</option>
                 </select>
             </div>
         </div>
         
         <div class="loading-container" id="loadingState">
             <div class="spinner"></div>
-            <div class="loading-text">Securely loading your expenses...</div>
+            <div id="loadingText">جاري تحميل مصروفاتك بشكل آمن...</div>
         </div>
         
         <div class="empty-state" id="emptyState">
             <div class="empty-icon">📊</div>
-            <div class="empty-text">No expenses yet</div>
-            <div class="empty-hint">Start tracking by sending expenses to your bot!</div>
+            <div id="emptyText">لا توجد مصروفات بعد</div>
+            <div id="emptyHint">ابدأ التتبع بإرسال مصروفاتك للبوت!</div>
         </div>
         
         <div class="error-state" id="errorState">
             <div class="error-icon">⚠️</div>
-            <div class="empty-text">Could not load expenses</div>
-            <div class="empty-hint" id="errorMessage">Please try again later</div>
+            <div id="errorText">تعذر تحميل المصروفات</div>
+            <div id="errorMessage">يرجى المحاولة لاحقاً</div>
         </div>
         
         <div class="kpi-grid" id="kpiGrid">
             <div class="kpi-card blue">
-                <div class="kpi-label">Total</div>
-                <div class="kpi-value" id="totalUSD">$0</div>
+                <div class="kpi-label" id="label-expenses">المصروفات</div>
+                <div class="kpi-value" id="totalExpenses">$0</div>
             </div>
             <div class="kpi-card green">
-                <div class="kpi-label">Count</div>
-                <div class="kpi-value" id="filteredCount">0</div>
+                <div class="kpi-label" id="label-income">الدخل</div>
+                <div class="kpi-value" id="totalIncome">$0</div>
+            </div>
+            <div class="kpi-card red">
+                <div class="kpi-label" id="label-net">الصافي</div>
+                <div class="kpi-value" id="netAmount">$0</div>
             </div>
             <div class="kpi-card purple">
-                <div class="kpi-label">Categories</div>
-                <div class="kpi-value" id="categoryCount">0</div>
+                <div class="kpi-label" id="label-count">العدد</div>
+                <div class="kpi-value" id="transactionCount">0</div>
             </div>
         </div>
         
         <div class="chart-section" id="chartSection">
             <div class="chart-card">
-                <div class="chart-title">Spending by Category</div>
+                <div class="chart-title" id="chartTitle">الإنفاق حسب الفئة</div>
                 <div class="chart-wrapper">
                     <canvas id="categoryChart"></canvas>
                 </div>
@@ -537,98 +483,181 @@
         <div class="table-section" id="tableSection">
             <div class="table-card">
                 <div class="table-header">
-                    <h2>Transactions</h2>
-                    <span class="filter-status" id="filterStatus">Loading...</span>
+                    <h2 id="transactionsTitle">المعاملات</h2>
+                    <span class="filter-status" id="filterStatus">...</span>
                 </div>
                 <div class="transaction-list" id="transactionList"></div>
             </div>
         </div>
     </div>
     
-    <button class="close-button" onclick="window.Telegram.WebApp.close()">
-        Close Dashboard
-    </button>
+    <div class="bottom-buttons">
+        <button class="export-button" onclick="exportToCSV()" id="exportBtn">
+            📥 <span id="exportText">تصدير</span>
+        </button>
+        <button class="close-button" onclick="window.Telegram.WebApp.close()" id="closeBtn">
+            <span id="closeText">إغلاق</span>
+        </button>
+    </div>
     
     <script>
-        // Initialize Telegram Web App
+        // Translations
+        const translations = {
+            ar: {
+                title: "💰 لوحة المصروفات",
+                subtitle: "تحليلات إنفاقك الشخصية",
+                loading: "جاري تحميل مصروفاتك بشكل آمن...",
+                emptyText: "لا توجد مصروفات بعد",
+                emptyHint: "ابدأ التتبع بإرسال مصروفاتك للبوت!",
+                errorText: "تعذر تحميل المصروفات",
+                errorHint: "يرجى المحاولة لاحقاً",
+                labelMonth: "الشهر",
+                labelCategory: "الفئة",
+                labelCurrency: "العملة",
+                allMonths: "كل الشهور",
+                allCategories: "كل الفئات",
+                allCurrencies: "كل العملات",
+                labelExpenses: "المصروفات",
+                labelIncome: "الدخل",
+                labelNet: "الصافي",
+                labelCount: "العدد",
+                chartTitle: "الإنفاق حسب الفئة",
+                transactionsTitle: "المعاملات",
+                exportText: "تصدير",
+                closeText: "إغلاق",
+                langButton: "English"
+            },
+            en: {
+                title: "💰 Expense Dashboard",
+                subtitle: "Your personal spending analytics",
+                loading: "Securely loading your expenses...",
+                emptyText: "No expenses yet",
+                emptyHint: "Start tracking by sending expenses to your bot!",
+                errorText: "Could not load expenses",
+                errorHint: "Please try again later",
+                labelMonth: "Month",
+                labelCategory: "Category",
+                labelCurrency: "Currency",
+                allMonths: "All Months",
+                allCategories: "All Categories",
+                allCurrencies: "All Currencies",
+                labelExpenses: "Expenses",
+                labelIncome: "Income",
+                labelNet: "Net",
+                labelCount: "Count",
+                chartTitle: "Spending by Category",
+                transactionsTitle: "Transactions",
+                exportText: "Export",
+                closeText: "Close",
+                langButton: "العربية"
+            }
+        };
+        
+        let currentLang = 'ar';
+        
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            document.documentElement.lang = currentLang;
+            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            updateTranslations();
+            if (rawExpenses.length > 0) {
+                updateDashboard();
+            }
+        }
+        
+        function updateTranslations() {
+            const t = translations[currentLang];
+            document.getElementById('title').textContent = t.title;
+            document.getElementById('subtitle').textContent = t.subtitle;
+            document.getElementById('loadingText').textContent = t.loading;
+            document.getElementById('emptyText').textContent = t.emptyText;
+            document.getElementById('emptyHint').textContent = t.emptyHint;
+            document.getElementById('errorText').textContent = t.errorText;
+            document.querySelector('.lang-switch').textContent = t.langButton;
+            document.getElementById('label-month').textContent = t.labelMonth;
+            document.getElementById('label-category').textContent = t.labelCategory;
+            document.getElementById('label-currency').textContent = t.labelCurrency;
+            document.getElementById('label-expenses').textContent = t.labelExpenses;
+            document.getElementById('label-income').textContent = t.labelIncome;
+            document.getElementById('label-net').textContent = t.labelNet;
+            document.getElementById('label-count').textContent = t.labelCount;
+            document.getElementById('chartTitle').textContent = t.chartTitle;
+            document.getElementById('transactionsTitle').textContent = t.transactionsTitle;
+            document.getElementById('exportText').textContent = t.exportText;
+            document.getElementById('closeText').textContent = t.closeText;
+            
+            // Update select options
+            document.querySelector('#monthFilter option[value="all"]').textContent = t.allMonths;
+            document.querySelector('#categoryFilter option[value="all"]').textContent = t.allCategories;
+            document.querySelector('#currencyFilter option[value="all"]').textContent = t.allCurrencies;
+        }
+        
+        // Initialize Telegram
         const tg = window.Telegram.WebApp;
         tg.expand();
         tg.enableClosingConfirmation();
         
-        // Get Telegram authentication data
         const initData = tg.initData;
         const telegramUser = tg.initDataUnsafe?.user;
         const currentUsername = telegramUser?.username || telegramUser?.first_name || 'Unknown';
         
-        // Display user info
         document.getElementById('userInfo').textContent = `👤 ${currentUsername}`;
         
-        // CRITICAL: Pass Telegram's initData for authentication
         const WEBHOOK_URL = `https://n8n.doktorautomata.shop/webhook/expense-dashboard?initData=${encodeURIComponent(initData)}`;
         
-        console.log('Telegram user:', telegramUser);
-        console.log('InitData present:', initData ? 'Yes' : 'No');
-        console.log('Authenticated as:', currentUsername);
-        
-        const COLORS = [
-            '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6',
-            '#ec4899', '#64748b', '#06b6d4', '#84cc16', '#f97316'
-        ];
+        const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#06b6d4', '#84cc16', '#f97316'];
         
         let rawExpenses = [];
+        let rawIncome = [];
         let filteredExpenses = [];
         let categoryChart = null;
+        let fullData = null;
         
         async function loadExpenses() {
             try {
-                console.log('Fetching authenticated data...');
                 const response = await fetch(WEBHOOK_URL);
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch data');
-                }
+                if (!response.ok) throw new Error('Failed to fetch');
                 
                 const data = await response.json();
-                console.log('Received data:', data);
-                
-                const expenseData = Array.isArray(data) ? data[0] : data;
+                fullData = Array.isArray(data) ? data[0] : data;
                 
                 document.getElementById('loadingState').style.display = 'none';
                 
-                // Check for authentication error
-                if (expenseData.error) {
+                if (fullData.error) {
                     document.getElementById('errorState').style.display = 'flex';
-                    document.getElementById('errorMessage').textContent = expenseData.error;
+                    document.getElementById('errorMessage').textContent = fullData.error;
                     return;
                 }
                 
-                if (expenseData.isEmpty || !expenseData.rawExpenses || expenseData.rawExpenses.length === 0) {
+                if (fullData.isEmpty) {
                     document.getElementById('emptyState').style.display = 'flex';
                     return;
                 }
                 
-                rawExpenses = expenseData.rawExpenses;
+                rawExpenses = fullData.rawExpenses || [];
+                rawIncome = fullData.rawIncome || [];
                 populateFilters();
                 updateDashboard();
                 
             } catch (error) {
-                console.error('Error loading expenses:', error);
+                console.error('Error:', error);
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('errorState').style.display = 'flex';
             }
         }
         
         function populateFilters() {
-            const months = [...new Set(rawExpenses.map(e => e.date.substring(0, 7)))].sort().reverse();
+            const allTransactions = [...rawExpenses, ...rawIncome];
+            const months = [...new Set(allTransactions.map(e => e.date.substring(0, 7)))].sort().reverse();
             const categories = [...new Set(rawExpenses.map(e => e.category))].sort();
-            const currencies = [...new Set(rawExpenses.map(e => e.currency))].sort();
+            const currencies = [...new Set(allTransactions.map(e => e.currency))].sort();
             
             const monthFilter = document.getElementById('monthFilter');
             months.forEach(month => {
                 const opt = document.createElement('option');
                 opt.value = month;
                 const date = new Date(month + '-01');
-                opt.textContent = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+                opt.textContent = date.toLocaleString(currentLang === 'ar' ? 'ar' : 'en', { month: 'long', year: 'numeric' });
                 monthFilter.appendChild(opt);
             });
             
@@ -644,7 +673,7 @@
             currencies.forEach(curr => {
                 const opt = document.createElement('option');
                 opt.value = curr;
-                opt.textContent = `${curr} Only`;
+                opt.textContent = `${curr} ${currentLang === 'ar' ? 'فقط' : 'Only'}`;
                 currencyFilter.appendChild(opt);
             });
             
@@ -660,89 +689,72 @@
             const categoryVal = document.getElementById('categoryFilter').value;
             const currencyVal = document.getElementById('currencyFilter').value;
             
-            filteredExpenses = rawExpenses.filter(expense => {
-                const monthMatch = monthVal === 'all' || expense.date.startsWith(monthVal);
-                const categoryMatch = categoryVal === 'all' || expense.category === categoryVal;
-                const currencyMatch = currencyVal === 'all' || expense.currency === currencyVal;
+            filteredExpenses = rawExpenses.filter(exp => {
+                const monthMatch = monthVal === 'all' || exp.date.startsWith(monthVal);
+                const categoryMatch = categoryVal === 'all' || exp.category === categoryVal;
+                const currencyMatch = currencyVal === 'all' || exp.currency === currencyVal;
                 return monthMatch && categoryMatch && currencyMatch;
             });
             
-            updateKPIs();
-            updateChart();
-            updateTransactions();
+            const filteredIncome = rawIncome.filter(inc => {
+                const monthMatch = monthVal === 'all' || inc.date.startsWith(monthVal);
+                const currencyMatch = currencyVal === 'all' || inc.currency === currencyVal;
+                return monthMatch && currencyMatch;
+            });
+            
+            updateKPIs(filteredExpenses, filteredIncome);
+            updateChart(filteredExpenses);
+            updateTransactions(filteredExpenses, filteredIncome);
             
             document.getElementById('kpiGrid').style.display = 'grid';
             document.getElementById('chartSection').style.display = 'block';
             document.getElementById('tableSection').style.display = 'block';
         }
         
-        function updateKPIs() {
-            let totalUSD = 0;
-            const categories = new Set();
+        function updateKPIs(expenses, income) {
+            const totalExp = expenses.reduce((sum, e) => sum + e.amountUSD, 0);
+            const totalInc = income.reduce((sum, i) => sum + i.amountUSD, 0);
+            const net = totalInc - totalExp;
             
-            filteredExpenses.forEach(expense => {
-                totalUSD += expense.amountUSD || 0;
-                categories.add(expense.category);
-            });
-            
-            document.getElementById('totalUSD').textContent = `$${totalUSD.toFixed(2)}`;
-            document.getElementById('filteredCount').textContent = filteredExpenses.length;
-            document.getElementById('categoryCount').textContent = categories.size;
+            document.getElementById('totalExpenses').textContent = `$${totalExp.toFixed(2)}`;
+            document.getElementById('totalIncome').textContent = `$${totalInc.toFixed(2)}`;
+            document.getElementById('netAmount').textContent = `$${net.toFixed(2)}`;
+            document.getElementById('netAmount').style.color = net >= 0 ? '#10b981' : '#ef4444';
+            document.getElementById('transactionCount').textContent = expenses.length + income.length;
         }
         
-        function updateChart() {
+        function updateChart(expenses) {
             const categoryTotals = {};
-            
-            filteredExpenses.forEach(expense => {
-                categoryTotals[expense.category] = (categoryTotals[expense.category] || 0) + (expense.amountUSD || 0);
+            expenses.forEach(exp => {
+                categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amountUSD;
             });
             
-            const sorted = Object.entries(categoryTotals)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 10);
-            
+            const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).slice(0, 10);
             const labels = sorted.map(([cat]) => cat);
             const values = sorted.map(([, val]) => val);
             const total = values.reduce((a, b) => a + b, 0);
             
             if (categoryChart) categoryChart.destroy();
-            const categoryCtx = document.getElementById('categoryChart').getContext('2d');
-            categoryChart = new Chart(categoryCtx, {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            categoryChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: COLORS,
-                        borderWidth: 0
-                    }]
+                    datasets: [{ data: values, backgroundColor: COLORS, borderWidth: 0 }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const value = context.parsed;
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
-                                }
-                            }
-                        }
-                    },
+                    plugins: { legend: { display: false } },
                     cutout: '70%'
                 }
             });
             
             const listContainer = document.getElementById('categoryList');
             listContainer.innerHTML = '';
-            
             sorted.forEach(([category, value], index) => {
                 const percentage = ((value / total) * 100).toFixed(1);
                 const color = COLORS[index % COLORS.length];
-                
                 const item = document.createElement('div');
                 item.className = 'category-item';
                 item.innerHTML = `
@@ -755,45 +767,67 @@
                         <div class="category-percentage">${percentage}%</div>
                     </div>
                 `;
-                
                 listContainer.appendChild(item);
             });
         }
         
-        function updateTransactions() {
+        function updateTransactions(expenses, income) {
+            const allTransactions = [...expenses.map(e => ({...e, type: 'expense'})), ...income.map(i => ({...i, type: 'income'}))];
+            allTransactions.sort((a, b) => b.date.localeCompare(a.date));
+            
             const listContainer = document.getElementById('transactionList');
             listContainer.innerHTML = '';
             
-            const sorted = [...filteredExpenses].sort((a, b) => b.date.localeCompare(a.date));
-            
-            sorted.forEach(expense => {
-                const currencyClass = expense.currency === 'EGP' ? 'egp' : 
-                                     expense.currency === 'USD' ? 'usd' : 'other';
+            allTransactions.forEach(trans => {
+                const currencyClass = trans.currency === 'EGP' ? 'egp' : trans.currency === 'USD' ? 'usd' : 'other';
+                const typeClass = trans.type === 'income' ? 'income' : currencyClass;
+                const typeIcon = trans.type === 'income' ? '↗️' : '↙️';
                 
-                const date = new Date(expense.date);
-                const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const date = new Date(trans.date);
+                const formattedDate = date.toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en', { month: 'short', day: 'numeric' });
                 
                 const item = document.createElement('div');
                 item.className = 'transaction-item';
                 item.innerHTML = `
                     <div class="transaction-header">
-                        <div class="transaction-category">${expense.category}</div>
+                        <div class="transaction-category">${typeIcon} ${trans.category}</div>
                         <div class="transaction-amount-wrapper">
-                            <div class="transaction-amount">${expense.amount.toLocaleString()}</div>
-                            <span class="currency-badge ${currencyClass}">${expense.currency}</span>
+                            <div class="transaction-amount">${trans.amount.toLocaleString()}</div>
+                            <span class="currency-badge ${typeClass}">${trans.currency}</span>
                         </div>
                     </div>
                     <div class="transaction-details">
-                        <div class="transaction-description">${expense.description}</div>
-                        <div class="transaction-date">${formattedDate}</div>
+                        <div>${trans.description}</div>
+                        <div>${formattedDate}</div>
                     </div>
+                    ${trans.store ? `<div class="transaction-store">🏪 ${trans.store}</div>` : ''}
                 `;
-                
                 listContainer.appendChild(item);
             });
             
-            document.getElementById('filterStatus').textContent = 
-                `${filteredExpenses.length} of ${rawExpenses.length}`;
+            document.getElementById('filterStatus').textContent = `${allTransactions.length} ${currentLang === 'ar' ? 'من' : 'of'} ${rawExpenses.length + rawIncome.length}`;
+        }
+        
+        function exportToCSV() {
+            const rows = [
+                ['Date', 'Type', 'Category', 'Description', 'Amount', 'Currency', 'Store'].join(',')
+            ];
+            
+            [...rawExpenses.map(e => ({...e, type: 'Expense'})), ...rawIncome.map(i => ({...i, type: 'Income'}))]
+                .sort((a, b) => b.date.localeCompare(a.date))
+                .forEach(trans => {
+                    rows.push(`${trans.date},${trans.type},"${trans.category}","${trans.description}",${trans.amount},${trans.currency},"${trans.store}"`);
+                });
+            
+            const csv = rows.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `expenses_${currentUsername}_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            alert(`✅ ${currentLang === 'ar' ? 'تم التصدير بنجاح!' : 'Export successful!'}`);
         }
         
         loadExpenses();
