@@ -887,7 +887,11 @@
         
         document.getElementById('userInfo').textContent = `👤 ${currentUsername}`;
         
-        const WEBHOOK_URL = `https://n8n.doktorautomata.shop/webhook/expense-dashboard?initData=${encodeURIComponent(initData)}`;
+        // Supabase Edge Function: verifies Telegram's signed initData and returns only this user's transactions.
+        const WEBHOOK_URL = `https://ajdphdgkwycecmtlxqgv.supabase.co/functions/v1/dashboard-api?initData=${encodeURIComponent(initData)}`;
+
+        // Escape text that comes from users' messages before putting it into HTML.
+        const esc = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
         
         const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#06b6d4', '#84cc16', '#f97316'];
         
@@ -1154,7 +1158,7 @@
                 item.innerHTML = `
                     <div class="category-left">
                         <div class="category-color" style="background-color: ${color}"></div>
-                        <div class="category-name">${category}</div>
+                        <div class="category-name">${esc(category)}</div>
                     </div>
                     <div class="category-right">
                         <div class="category-amount">$${value.toFixed(2)}</div>
@@ -1212,7 +1216,7 @@
                 item.className = 'currency-item';
                 item.innerHTML = `
                     <div class="currency-flag">${currencyFlags[currency] || '💱'}</div>
-                    <div class="currency-code">${currency}</div>
+                    <div class="currency-code">${esc(currency)}</div>
                     <div class="currency-amount">${amount.toLocaleString()}</div>
                 `;
                 gridContainer.appendChild(item);
@@ -1238,17 +1242,17 @@
                 item.className = 'transaction-item';
                 item.innerHTML = `
                     <div class="transaction-header">
-                        <div class="transaction-category">${typeIcon} ${trans.category}</div>
+                        <div class="transaction-category">${typeIcon} ${esc(trans.category)}</div>
                         <div class="transaction-amount-wrapper">
                             <div class="transaction-amount">${trans.amount.toLocaleString()}</div>
-                            <span class="currency-badge ${typeClass}">${trans.currency}</span>
+                            <span class="currency-badge ${typeClass}">${esc(trans.currency)}</span>
                         </div>
                     </div>
                     <div class="transaction-details">
-                        <div>${trans.description}</div>
+                        <div>${esc(trans.description)}</div>
                         <div>${formattedDate}</div>
                     </div>
-                    ${trans.store ? `<div class="transaction-store">🏪 ${trans.store}</div>` : ''}
+                    ${trans.store ? `<div class="transaction-store">🏪 ${esc(trans.store)}</div>` : ''}
                 `;
                 listContainer.appendChild(item);
             });
