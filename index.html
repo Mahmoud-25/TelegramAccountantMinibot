@@ -4,58 +4,60 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>💰 لوحة المصروفات</title>
-    
+
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Cairo', sans-serif;
             background-color: var(--tg-theme-bg-color, #f8fafc);
             color: var(--tg-theme-text-color, #1e293b);
             padding: 12px;
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 84px;
         }
-        
-        body[dir="ltr"] {
-            text-align: left;
-        }
-        
-        body[dir="rtl"] {
-            text-align: right;
-        }
-        
+
+        body[dir="ltr"] { text-align: left; }
+        body[dir="rtl"] { text-align: right; }
+
+        .hidden { display: none !important; }
+
         .container {
-            max-width: 100%;
+            max-width: 760px;
             margin: 0 auto;
         }
-        
+
         /* Header */
-        .header {
-            margin-bottom: 16px;
-        }
-        
+        .header { margin-bottom: 16px; }
+
         .header-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 8px;
             margin-bottom: 8px;
         }
-        
+
         h1 {
             font-size: 22px;
             font-weight: 700;
             margin-bottom: 4px;
         }
-        
-        .lang-switch {
+
+        .header-actions {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .lang-switch, .icon-button, .retry-button {
             background: var(--tg-theme-button-color, #3390ec);
             color: var(--tg-theme-button-text-color, #ffffff);
             border: none;
@@ -65,12 +67,28 @@
             font-weight: 600;
             cursor: pointer;
         }
-        
+
+        .icon-button {
+            padding: 6px 10px;
+            font-size: 14px;
+            line-height: 1;
+        }
+
+        .icon-button.spinning span {
+            display: inline-block;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .retry-button {
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+
         .subtitle {
             font-size: 12px;
             color: var(--tg-theme-hint-color, #64748b);
         }
-        
+
         .user-info {
             font-size: 11px;
             color: var(--tg-theme-hint-color, #64748b);
@@ -80,8 +98,8 @@
             border-radius: 6px;
             display: inline-block;
         }
-        
-        /* Loading States */
+
+        /* Loading / empty / error */
         .loading-container, .empty-state, .error-state {
             display: none;
             flex-direction: column;
@@ -92,7 +110,7 @@
             padding: 30px 20px;
             gap: 16px;
         }
-        
+
         .spinner {
             width: 48px;
             height: 48px;
@@ -101,16 +119,14 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .empty-icon, .error-icon {
             font-size: 48px;
             opacity: 0.5;
         }
-        
+
         /* Filters */
         .filters {
             display: grid;
@@ -118,34 +134,37 @@
             gap: 8px;
             margin-bottom: 16px;
         }
-        
+
         .filter-label {
+            display: block;
             font-size: 10px;
             font-weight: 700;
             color: var(--tg-theme-hint-color, #94a3b8);
             text-transform: uppercase;
             margin-bottom: 4px;
         }
-        
-        select {
+
+        select, .text-input {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #1e293b);
             border: 1px solid var(--tg-theme-hint-color, #e2e8f0);
             border-radius: 8px;
-            padding: 10px 32px 10px 12px;
+            padding: 10px 12px;
             font-size: 14px;
             width: 100%;
-            cursor: pointer;
+            font-family: inherit;
         }
-        
-        /* KPI Cards */
+
+        select { cursor: pointer; }
+
+        /* KPI cards */
         .kpi-grid {
-            display: none;
+            display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-bottom: 16px;
         }
-        
+
         .kpi-card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
             padding: 12px;
@@ -154,7 +173,7 @@
             position: relative;
             overflow: hidden;
         }
-        
+
         .kpi-card::before {
             content: '';
             position: absolute;
@@ -163,31 +182,46 @@
             width: 4px;
             height: 100%;
         }
-        
+
         body[dir="rtl"] .kpi-card::before {
             right: auto;
             left: 0;
         }
-        
+
         .kpi-card.blue::before { background: #3b82f6; }
         .kpi-card.green::before { background: #10b981; }
         .kpi-card.red::before { background: #ef4444; }
         .kpi-card.purple::before { background: #8b5cf6; }
-        
+
         .kpi-label {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 600;
             color: var(--tg-theme-hint-color, #64748b);
             text-transform: uppercase;
             margin-bottom: 4px;
         }
-        
+
         .kpi-value {
             font-size: 18px;
             font-weight: 700;
             color: var(--tg-theme-text-color, #1e293b);
+            direction: ltr;
+            unicode-bidi: isolate;
         }
-        
+
+        body[dir="rtl"] .kpi-value { text-align: right; }
+
+        .kpi-delta {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            margin-top: 4px;
+            color: var(--tg-theme-hint-color, #64748b);
+        }
+
+        .kpi-delta .good { color: #10b981; }
+        .kpi-delta .bad { color: #ef4444; }
+
         .kpi-icon {
             position: absolute;
             top: 10px;
@@ -195,40 +229,45 @@
             font-size: 24px;
             opacity: 0.2;
         }
-        
+
         body[dir="rtl"] .kpi-icon {
             right: auto;
             left: 10px;
         }
-        
-        /* Income vs Expense Comparison Card */
+
+        .fx-note {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin: -8px 2px 16px;
+        }
+
+        /* Income vs expenses */
         .comparison-card {
-            display: none;
             background: var(--tg-theme-secondary-bg-color, #ffffff);
             padding: 16px;
             border-radius: 12px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 16px;
         }
-        
+
         .comparison-title {
             font-size: 15px;
             font-weight: 600;
             margin-bottom: 12px;
         }
-        
+
         .comparison-bars {
             display: flex;
             flex-direction: column;
             gap: 12px;
         }
-        
+
         .bar-item {
             display: flex;
             flex-direction: column;
             gap: 4px;
         }
-        
+
         .bar-label {
             display: flex;
             justify-content: space-between;
@@ -236,12 +275,14 @@
             font-size: 13px;
             font-weight: 600;
         }
-        
+
         .bar-amount {
             font-size: 14px;
             font-weight: 700;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
-        
+
         .bar-track {
             height: 32px;
             background: var(--tg-theme-bg-color, #f1f5f9);
@@ -249,7 +290,7 @@
             overflow: hidden;
             position: relative;
         }
-        
+
         .bar-fill {
             height: 100%;
             display: flex;
@@ -260,19 +301,12 @@
             color: white;
             transition: width 0.5s ease;
         }
-        
-        body[dir="rtl"] .bar-fill {
-            justify-content: flex-end;
-        }
-        
-        .bar-fill.income {
-            background: linear-gradient(135deg, #10b981, #059669);
-        }
-        
-        .bar-fill.expense {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-        
+
+        body[dir="rtl"] .bar-fill { justify-content: flex-end; }
+
+        .bar-fill.income { background: linear-gradient(135deg, #10b981, #059669); }
+        .bar-fill.expense { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
         .balance-indicator {
             margin-top: 12px;
             padding: 12px;
@@ -282,23 +316,18 @@
             align-items: center;
             font-weight: 600;
         }
-        
+
         .balance-indicator.positive {
             background: #d1fae5;
             color: #065f46;
         }
-        
+
         .balance-indicator.negative {
             background: #fee2e2;
             color: #991b1b;
         }
-        
+
         /* Charts */
-        .chart-section {
-            display: none;
-            margin-bottom: 16px;
-        }
-        
         .chart-card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
             padding: 16px;
@@ -306,7 +335,7 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 12px;
         }
-        
+
         .chart-title {
             font-size: 15px;
             font-weight: 600;
@@ -315,28 +344,28 @@
             align-items: center;
             gap: 8px;
         }
-        
+
+        .chart-hint {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin: -6px 0 10px;
+        }
+
         .chart-wrapper {
             height: 240px;
             position: relative;
         }
-        
-        .chart-wrapper.line-chart {
-            height: 200px;
-        }
-        
-        .chart-wrapper.bar-chart {
-            height: 220px;
-        }
-        
-        /* Category List */
+
+        .chart-wrapper.bar-chart { height: 220px; }
+
+        /* Category list */
         .category-list {
             display: flex;
             flex-direction: column;
             gap: 6px;
             margin-top: 12px;
         }
-        
+
         .category-item {
             display: flex;
             justify-content: space-between;
@@ -344,113 +373,89 @@
             padding: 10px 12px;
             background: var(--tg-theme-bg-color, #f8fafc);
             border-radius: 8px;
+            cursor: pointer;
         }
-        
+
+        .category-item:active { opacity: 0.7; }
+
         .category-left {
             display: flex;
             align-items: center;
             gap: 10px;
             flex: 1;
         }
-        
+
         .category-color {
             width: 14px;
             height: 14px;
             border-radius: 3px;
+            flex-shrink: 0;
         }
-        
+
         .category-right {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
         }
-        
-        body[dir="rtl"] .category-right {
-            align-items: flex-start;
-        }
-        
+
+        body[dir="rtl"] .category-right { align-items: flex-start; }
+
         .category-amount {
             font-size: 14px;
             font-weight: 700;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
-        
+
         .category-percentage {
             font-size: 11px;
             color: var(--tg-theme-hint-color, #64748b);
         }
-        
-        /* Daily Trend Card */
+
+        /* Trend stats */
         .trend-stats {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
             margin-top: 12px;
         }
-        
+
         .trend-stat {
             padding: 10px;
             background: var(--tg-theme-bg-color, #f8fafc);
             border-radius: 8px;
             text-align: center;
         }
-        
+
         .trend-stat-label {
             font-size: 10px;
             color: var(--tg-theme-hint-color, #64748b);
             text-transform: uppercase;
             margin-bottom: 4px;
         }
-        
+
         .trend-stat-value {
             font-size: 16px;
             font-weight: 700;
+            direction: ltr;
+            unicode-bidi: isolate;
         }
-        
-        /* Currency Breakdown */
-        .currency-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-top: 12px;
-        }
-        
-        .currency-item {
-            padding: 12px;
-            background: var(--tg-theme-bg-color, #f8fafc);
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .currency-flag {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-        
-        .currency-code {
-            font-size: 11px;
+
+        .trend-stat-sub {
+            font-size: 10px;
             color: var(--tg-theme-hint-color, #64748b);
-            font-weight: 600;
+            margin-top: 2px;
         }
-        
-        .currency-amount {
-            font-size: 16px;
-            font-weight: 700;
-            margin-top: 4px;
-        }
-        
+
         /* Transactions */
-        .table-section {
-            display: none;
-            margin-bottom: 16px;
-        }
-        
         .table-card {
             background: var(--tg-theme-secondary-bg-color, #ffffff);
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 16px;
         }
-        
+
         .table-header {
             padding: 12px 16px;
             border-bottom: 1px solid var(--tg-theme-hint-color, #e2e8f0);
@@ -458,55 +463,79 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .table-header h2 {
             font-size: 15px;
             font-weight: 600;
         }
-        
+
         .filter-status {
             font-size: 10px;
             background: var(--tg-theme-bg-color, #f1f5f9);
             padding: 3px 8px;
             border-radius: 6px;
         }
-        
-        .transaction-list {
-            max-height: 400px;
-            overflow-y: auto;
+
+        .search-wrap { padding: 10px 16px 0; }
+
+        .search-wrap .text-input { background: var(--tg-theme-bg-color, #f8fafc); }
+
+        .edit-hint {
+            font-size: 10px;
+            color: var(--tg-theme-hint-color, #64748b);
+            padding: 6px 16px 8px;
         }
-        
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 16px 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--tg-theme-hint-color, #64748b);
+            background: var(--tg-theme-bg-color, #f8fafc);
+        }
+
+        .day-total {
+            direction: ltr;
+            unicode-bidi: isolate;
+        }
+
         .transaction-item {
             padding: 12px 16px;
             border-bottom: 1px solid var(--tg-theme-hint-color, #f1f5f9);
+            cursor: pointer;
         }
-        
+
+        .transaction-item:active { background: rgba(127, 127, 127, 0.08); }
+
         .transaction-header {
             display: flex;
             justify-content: space-between;
+            gap: 8px;
             margin-bottom: 6px;
         }
-        
+
         .transaction-category {
             font-size: 14px;
             font-weight: 600;
         }
-        
+
         .transaction-amount-wrapper {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
+            flex-shrink: 0;
         }
-        
-        body[dir="rtl"] .transaction-amount-wrapper {
-            align-items: flex-start;
-        }
-        
+
+        body[dir="rtl"] .transaction-amount-wrapper { align-items: flex-start; }
+
         .transaction-amount {
             font-size: 15px;
             font-weight: 700;
         }
-        
+
         .currency-badge {
             display: inline-block;
             padding: 2px 6px;
@@ -515,36 +544,49 @@
             font-weight: 700;
             margin-top: 2px;
         }
-        
-        .currency-badge.egp {
-            background: #dbeafe;
-            color: #1e40af;
-        }
-        
-        .currency-badge.usd {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
-        .currency-badge.income {
-            background: #d1fae5;
-            color: #065f46;
-        }
-        
+
+        .currency-badge.egp { background: #dbeafe; color: #1e40af; }
+        .currency-badge.usd { background: #d1fae5; color: #065f46; }
+        .currency-badge.other { background: #fef3c7; color: #92400e; }
+        .currency-badge.income { background: #d1fae5; color: #065f46; }
+        .currency-badge.transfer { background: #ede9fe; color: #5b21b6; }
+
         .transaction-details {
-            display: flex;
-            justify-content: space-between;
             font-size: 12px;
             color: var(--tg-theme-hint-color, #64748b);
+            word-break: break-word;
         }
-        
+
         .transaction-store {
             font-style: italic;
             margin-top: 4px;
             font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
         }
-        
-        /* Bottom Button */
+
+        .list-empty {
+            padding: 24px 16px;
+            text-align: center;
+            color: var(--tg-theme-hint-color, #64748b);
+            font-size: 13px;
+        }
+
+        .more-button {
+            display: block;
+            width: calc(100% - 32px);
+            margin: 12px 16px 16px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px dashed var(--tg-theme-hint-color, #cbd5e1);
+            background: transparent;
+            color: var(--tg-theme-link-color, #3390ec);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Bottom button */
         .bottom-button {
             position: fixed;
             bottom: 0;
@@ -555,7 +597,7 @@
             box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
             z-index: 100;
         }
-        
+
         .close-button {
             width: 100%;
             padding: 14px;
@@ -566,701 +608,1275 @@
             cursor: pointer;
             background: var(--tg-theme-button-color, #3390ec);
             color: var(--tg-theme-button-text-color, #ffffff);
+            font-family: inherit;
         }
-        
-        @media (min-width: 768px) {
-            .kpi-grid {
-                grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .filters {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .currency-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
+
+        /* Edit sheet */
+        .sheet-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .sheet {
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #1e293b);
+            width: 100%;
+            max-width: 560px;
+            max-height: 92vh;
+            overflow-y: auto;
+            border-radius: 16px 16px 0 0;
+            padding: 12px 16px 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .sheet-handle {
+            width: 40px;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--tg-theme-hint-color, #94a3b8);
+            opacity: 0.4;
+            margin: 0 auto 10px;
+        }
+
+        .sheet h3 {
+            font-size: 17px;
+            margin-bottom: 8px;
+        }
+
+        .sheet-raw {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #64748b);
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+            border-radius: 8px;
+            padding: 8px 10px;
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .field { margin-bottom: 10px; }
+
+        .field > label {
+            display: block;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin-bottom: 4px;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 8px;
+        }
+
+        .segmented {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+        }
+
+        .segmented button {
+            padding: 9px 6px;
+            border-radius: 8px;
+            border: 1px solid var(--tg-theme-hint-color, #cbd5e1);
+            background: transparent;
+            color: var(--tg-theme-text-color, #1e293b);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .segmented button.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        .sheet-error {
+            color: #ef4444;
+            font-size: 12px;
+            margin: 4px 0 8px;
+        }
+
+        .sheet-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1.4fr;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            padding: 12px 8px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .btn.primary {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        .btn.secondary {
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+            color: var(--tg-theme-text-color, #1e293b);
+        }
+
+        .btn.danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .btn:disabled { opacity: 0.5; }
+
+        @media (min-width: 600px) {
+            .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+            .filters { grid-template-columns: repeat(3, 1fr); }
         }
     </style>
 </head>
-<body>
+<body dir="rtl">
     <div class="container">
         <div class="header">
             <div class="header-top">
                 <h1 id="title">💰 لوحة المصروفات</h1>
-                <button class="lang-switch" onclick="toggleLanguage()">English</button>
+                <div class="header-actions">
+                    <button class="icon-button" id="refreshButton" type="button" aria-label="تحديث"><span>🔄</span></button>
+                    <button class="lang-switch" id="langButton" type="button">English</button>
+                </div>
             </div>
             <p class="subtitle" id="subtitle">تحليلات إنفاقك الشخصية</p>
-            <div class="user-info" id="userInfo">جاري التحميل...</div>
+            <div class="user-info" id="userInfo">…</div>
         </div>
-        
-        <div class="filters" id="filtersContainer" style="display: none;">
+
+        <div class="filters hidden" id="filtersContainer">
             <div class="filter-group">
-                <label class="filter-label" id="label-month">الشهر</label>
-                <select id="monthFilter">
-                    <option value="all">كل الشهور</option>
-                </select>
+                <label class="filter-label" id="label-month" for="monthFilter">الشهر</label>
+                <select id="monthFilter"></select>
             </div>
             <div class="filter-group">
-                <label class="filter-label" id="label-category">الفئة</label>
-                <select id="categoryFilter">
-                    <option value="all">كل الفئات</option>
-                </select>
+                <label class="filter-label" id="label-category" for="categoryFilter">الفئة</label>
+                <select id="categoryFilter"></select>
             </div>
             <div class="filter-group">
-                <label class="filter-label" id="label-currency">العملة</label>
-                <select id="currencyFilter">
-                    <option value="all">كل العملات</option>
-                </select>
+                <label class="filter-label" id="label-currency" for="currencyFilter">العملة</label>
+                <select id="currencyFilter"></select>
             </div>
         </div>
-        
-        <div class="loading-container" id="loadingState">
+
+        <div class="loading-container" id="loadingState" style="display: flex;">
             <div class="spinner"></div>
             <div id="loadingText">جاري تحميل مصروفاتك بشكل آمن...</div>
         </div>
-        
+
         <div class="empty-state" id="emptyState">
             <div class="empty-icon">📊</div>
             <div id="emptyText">لا توجد مصروفات بعد</div>
             <div id="emptyHint">ابدأ التتبع بإرسال مصروفاتك للبوت!</div>
         </div>
-        
+
         <div class="error-state" id="errorState">
             <div class="error-icon">⚠️</div>
             <div id="errorText">تعذر تحميل المصروفات</div>
             <div id="errorMessage">يرجى المحاولة لاحقاً</div>
+            <button class="retry-button" id="retryButton" type="button">إعادة المحاولة</button>
         </div>
-        
-        <!-- KPI Cards -->
-        <div class="kpi-grid" id="kpiGrid">
-            <div class="kpi-card blue">
-                <div class="kpi-icon">💸</div>
-                <div class="kpi-label" id="label-expenses">المصروفات</div>
-                <div class="kpi-value" id="totalExpenses">$0</div>
-            </div>
-            <div class="kpi-card green">
-                <div class="kpi-icon">💰</div>
-                <div class="kpi-label" id="label-income">الدخل</div>
-                <div class="kpi-value" id="totalIncome">$0</div>
-            </div>
-            <div class="kpi-card red">
-                <div class="kpi-icon">📊</div>
-                <div class="kpi-label" id="label-net">الصافي</div>
-                <div class="kpi-value" id="netAmount">$0</div>
-            </div>
-            <div class="kpi-card purple">
-                <div class="kpi-icon">📝</div>
-                <div class="kpi-label" id="label-count">العدد</div>
-                <div class="kpi-value" id="transactionCount">0</div>
-            </div>
-        </div>
-        
-        <!-- Income vs Expense Comparison -->
-        <div class="comparison-card" id="comparisonCard">
-            <div class="comparison-title" id="comparisonTitle">📊 الدخل مقابل المصروفات</div>
-            <div class="comparison-bars">
-                <div class="bar-item">
-                    <div class="bar-label">
-                        <span id="incomeLabel">💰 الدخل</span>
-                        <span class="bar-amount" id="incomeBarAmount">$0</span>
-                    </div>
-                    <div class="bar-track">
-                        <div class="bar-fill income" id="incomeBar">0%</div>
-                    </div>
+
+        <div id="content" class="hidden">
+            <div class="kpi-grid" id="kpiGrid">
+                <div class="kpi-card blue">
+                    <div class="kpi-icon" id="kpiIcon0">💸</div>
+                    <div class="kpi-label" id="kpiLabel0"></div>
+                    <div class="kpi-value" id="kpiValue0"></div>
+                    <span class="kpi-delta" id="kpiDelta0"></span>
                 </div>
-                <div class="bar-item">
-                    <div class="bar-label">
-                        <span id="expenseLabel">💸 المصروفات</span>
-                        <span class="bar-amount" id="expenseBarAmount">$0</span>
-                    </div>
-                    <div class="bar-track">
-                        <div class="bar-fill expense" id="expenseBar">0%</div>
-                    </div>
+                <div class="kpi-card green">
+                    <div class="kpi-icon" id="kpiIcon1">💰</div>
+                    <div class="kpi-label" id="kpiLabel1"></div>
+                    <div class="kpi-value" id="kpiValue1"></div>
+                    <span class="kpi-delta" id="kpiDelta1"></span>
+                </div>
+                <div class="kpi-card red">
+                    <div class="kpi-icon" id="kpiIcon2">📊</div>
+                    <div class="kpi-label" id="kpiLabel2"></div>
+                    <div class="kpi-value" id="kpiValue2"></div>
+                    <span class="kpi-delta" id="kpiDelta2"></span>
+                </div>
+                <div class="kpi-card purple">
+                    <div class="kpi-icon" id="kpiIcon3">📝</div>
+                    <div class="kpi-label" id="kpiLabel3"></div>
+                    <div class="kpi-value" id="kpiValue3"></div>
+                    <span class="kpi-delta" id="kpiDelta3"></span>
                 </div>
             </div>
-            <div class="balance-indicator" id="balanceIndicator">
-                <span id="balanceText">الرصيد:</span>
-                <span id="balanceValue">$0</span>
-            </div>
-        </div>
-        
-        <!-- Daily Spending Trend Chart -->
-        <div class="chart-section" id="chartSection">
-            <div class="chart-card">
-                <div class="chart-title">
-                    <span>📈</span>
-                    <span id="trendChartTitle">اتجاه الإنفاق اليومي</span>
+            <div class="fx-note hidden" id="fxNote"></div>
+
+            <div class="comparison-card" id="comparisonCard">
+                <div class="comparison-title" id="comparisonTitle">📊 الدخل مقابل المصروفات</div>
+                <div class="comparison-bars">
+                    <div class="bar-item">
+                        <div class="bar-label">
+                            <span id="incomeLabel">💰 الدخل</span>
+                            <span class="bar-amount" id="incomeBarAmount"></span>
+                        </div>
+                        <div class="bar-track"><div class="bar-fill income" id="incomeBar"></div></div>
+                    </div>
+                    <div class="bar-item">
+                        <div class="bar-label">
+                            <span id="expenseLabel">💸 المصروفات</span>
+                            <span class="bar-amount" id="expenseBarAmount"></span>
+                        </div>
+                        <div class="bar-track"><div class="bar-fill expense" id="expenseBar"></div></div>
+                    </div>
                 </div>
-                <div class="chart-wrapper line-chart">
-                    <canvas id="trendChart"></canvas>
-                </div>
-                <div class="trend-stats">
-                    <div class="trend-stat">
-                        <div class="trend-stat-label" id="avgDayLabel">متوسط يومي</div>
-                        <div class="trend-stat-value" id="avgDayValue">$0</div>
-                    </div>
-                    <div class="trend-stat">
-                        <div class="trend-stat-label" id="maxDayLabel">أعلى يوم</div>
-                        <div class="trend-stat-value" id="maxDayValue">$0</div>
-                    </div>
-                    <div class="trend-stat">
-                        <div class="trend-stat-label" id="totalDaysLabel">عدد الأيام</div>
-                        <div class="trend-stat-value" id="totalDaysValue">0</div>
-                    </div>
-                    <div class="trend-stat">
-                        <div class="trend-stat-label" id="minDayLabel">أقل يوم</div>
-                        <div class="trend-stat-value" id="minDayValue">$0</div>
-                    </div>
+                <div class="balance-indicator" id="balanceIndicator">
+                    <span id="balanceText">الرصيد:</span>
+                    <span class="bar-amount" id="balanceValue"></span>
                 </div>
             </div>
-            
-            <!-- Category Breakdown -->
-            <div class="chart-card">
-                <div class="chart-title">
-                    <span>🎯</span>
-                    <span id="categoryChartTitle">الإنفاق حسب الفئة</span>
-                </div>
-                <div class="chart-wrapper">
-                    <canvas id="categoryChart"></canvas>
-                </div>
+
+            <div class="chart-card" id="trendCard">
+                <div class="chart-title"><span>📈</span><span id="trendTitle"></span></div>
+                <div class="chart-wrapper bar-chart"><canvas id="trendChart"></canvas></div>
+                <div class="trend-stats" id="trendStats"></div>
+            </div>
+
+            <div class="chart-card" id="categoryCard">
+                <div class="chart-title"><span>🎯</span><span id="categoryTitle">الإنفاق حسب الفئة</span></div>
+                <div class="chart-hint" id="categoryHint"></div>
+                <div class="chart-wrapper"><canvas id="categoryChart"></canvas></div>
                 <div class="category-list" id="categoryList"></div>
             </div>
-            
-            <!-- Currency Distribution -->
-            <div class="chart-card">
-                <div class="chart-title">
-                    <span>💱</span>
-                    <span id="currencyChartTitle">توزيع العملات</span>
-                </div>
-                <div class="chart-wrapper bar-chart">
-                    <canvas id="currencyChart"></canvas>
-                </div>
-                <div class="currency-grid" id="currencyGrid"></div>
+
+            <div class="chart-card" id="monthlyCard">
+                <div class="chart-title"><span>📊</span><span id="monthlyTitle"></span></div>
+                <div class="chart-wrapper bar-chart"><canvas id="monthlyChart"></canvas></div>
             </div>
-        </div>
-        
-        <!-- Transactions List -->
-        <div class="table-section" id="tableSection">
-            <div class="table-card">
+
+            <div class="table-card" id="tableSection">
                 <div class="table-header">
                     <h2 id="transactionsTitle">📋 المعاملات</h2>
-                    <span class="filter-status" id="filterStatus">...</span>
+                    <span class="filter-status" id="filterStatus"></span>
                 </div>
+                <div class="search-wrap">
+                    <input class="text-input" id="searchInput" type="search" autocomplete="off">
+                </div>
+                <div class="edit-hint" id="editHint"></div>
                 <div class="transaction-list" id="transactionList"></div>
+                <button class="more-button hidden" id="moreButton" type="button"></button>
             </div>
         </div>
     </div>
-    
+
     <div class="bottom-button">
-        <button class="close-button" onclick="window.Telegram.WebApp.close()">
-            <span id="closeText">إغلاق اللوحة</span>
-        </button>
+        <button class="close-button" id="closeButton" type="button"><span id="closeText">إغلاق اللوحة</span></button>
     </div>
-    
+
+    <div class="sheet-backdrop hidden" id="sheetBackdrop">
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+            <div class="sheet-handle"></div>
+            <h3 id="sheetTitle">تعديل المعاملة</h3>
+            <div class="sheet-raw" id="sheetRaw"></div>
+            <div class="field-row">
+                <div class="field">
+                    <label for="editAmount" id="lblAmount">المبلغ</label>
+                    <input class="text-input" id="editAmount" type="number" inputmode="decimal" step="0.01" min="0.01" dir="ltr">
+                </div>
+                <div class="field">
+                    <label for="editCurrency" id="lblCurrency">العملة</label>
+                    <select id="editCurrency"></select>
+                </div>
+            </div>
+            <div class="field">
+                <label id="lblType">النوع</label>
+                <div class="segmented" id="editType">
+                    <button type="button" data-type="Expense"></button>
+                    <button type="button" data-type="Income"></button>
+                    <button type="button" data-type="Transfer"></button>
+                </div>
+            </div>
+            <div class="field">
+                <label for="editCategory" id="lblCategory">الفئة</label>
+                <select id="editCategory"></select>
+            </div>
+            <div class="field">
+                <label for="editDate" id="lblDate">التاريخ</label>
+                <input class="text-input" id="editDate" type="date" dir="ltr">
+            </div>
+            <div class="field">
+                <label for="editDescription" id="lblDescription">الوصف</label>
+                <input class="text-input" id="editDescription" type="text" maxlength="300">
+            </div>
+            <div class="field">
+                <label for="editStore" id="lblStore">المتجر</label>
+                <input class="text-input" id="editStore" type="text" maxlength="120">
+            </div>
+            <div class="sheet-error hidden" id="sheetError"></div>
+            <div class="sheet-actions">
+                <button class="btn danger" id="deleteButton" type="button">حذف</button>
+                <button class="btn secondary" id="cancelButton" type="button">إلغاء</button>
+                <button class="btn primary" id="saveButton" type="button">حفظ</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // Translations
-        const translations = {
+        // Data comes from a Supabase Edge Function that verifies Telegram's signed initData
+        // and only ever returns or changes the transactions of the user who opened the app.
+        const API_URL = 'https://ajdphdgkwycecmtlxqgv.supabase.co/functions/v1/dashboard-api';
+
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) {
+            tg.ready();
+            tg.expand();
+        }
+
+        const I18N = {
             ar: {
-                title: "💰 لوحة المصروفات",
-                subtitle: "تحليلات إنفاقك الشخصية",
-                loading: "جاري تحميل مصروفاتك بشكل آمن...",
-                emptyText: "لا توجد مصروفات بعد",
-                emptyHint: "ابدأ التتبع بإرسال مصروفاتك للبوت!",
-                errorText: "تعذر تحميل المصروفات",
-                errorHint: "يرجى المحاولة لاحقاً",
-                labelMonth: "الشهر",
-                labelCategory: "الفئة",
-                labelCurrency: "العملة",
-                allMonths: "كل الشهور",
-                allCategories: "كل الفئات",
-                allCurrencies: "كل العملات",
-                labelExpenses: "المصروفات",
-                labelIncome: "الدخل",
-                labelNet: "الصافي",
-                labelCount: "العدد",
-                comparisonTitle: "📊 الدخل مقابل المصروفات",
-                incomeLabel: "💰 الدخل",
-                expenseLabel: "💸 المصروفات",
-                balanceText: "الرصيد:",
-                trendChartTitle: "اتجاه الإنفاق اليومي",
-                categoryChartTitle: "الإنفاق حسب الفئة",
-                currencyChartTitle: "توزيع العملات",
-                transactionsTitle: "📋 المعاملات",
-                closeText: "إغلاق اللوحة",
-                langButton: "English",
-                avgDayLabel: "متوسط يومي",
-                maxDayLabel: "أعلى يوم",
-                totalDaysLabel: "عدد الأيام",
-                minDayLabel: "أقل يوم"
+                title: '💰 لوحة المصروفات',
+                subtitle: 'تحليلات إنفاقك الشخصية',
+                loading: 'جاري تحميل مصروفاتك بشكل آمن...',
+                emptyText: 'لا توجد مصروفات بعد',
+                emptyHint: 'ابدأ التتبع بإرسال مصروفاتك للبوت!',
+                errorText: 'تعذر تحميل المصروفات',
+                errorHint: 'يرجى المحاولة لاحقاً',
+                retry: 'إعادة المحاولة',
+                refresh: 'تحديث',
+                langButton: 'English',
+                labelMonth: 'الشهر',
+                labelCategory: 'الفئة',
+                labelCurrency: 'العملة',
+                allMonths: 'كل الشهور',
+                allCategories: 'كل الفئات',
+                showIn: 'عرض الكل بـ {cur}',
+                only: 'معاملات {cur} فقط',
+                expenses: 'المصروفات',
+                income: 'الدخل',
+                net: 'الصافي',
+                count: 'عدد المعاملات',
+                categorySpend: 'مصروفات الفئة',
+                share: 'من إجمالي المصروفات',
+                avgPerTx: 'متوسط المعاملة',
+                vsMonth: 'عن {month}',
+                vsMonthPartial: 'عن نفس الفترة من {month}',
+                fxNote: 'تحويل العملات بأسعار {date}: {pairs}',
+                fxApprox: 'تقريبية',
+                comparisonTitle: '📊 الدخل مقابل المصروفات',
+                incomeLabel: '💰 الدخل',
+                expenseLabel: '💸 المصروفات',
+                balanceText: 'الرصيد:',
+                dailyTitle: 'الإنفاق اليومي — {month}',
+                monthlyTitle: 'الإنفاق الشهري',
+                categoryTrendTitle: 'الإنفاق الشهري: {category}',
+                avgDay: 'متوسط يومي',
+                maxDay: 'أعلى يوم',
+                spendDays: 'أيام بها إنفاق',
+                zeroDays: 'أيام بدون إنفاق',
+                avgMonth: 'متوسط شهري',
+                maxMonth: 'أعلى شهر',
+                minMonth: 'أقل شهر',
+                monthsCount: 'عدد الشهور',
+                monthsWithSpend: 'شهور بها إنفاق',
+                vsAverage: '{month} مقارنة بالمتوسط',
+                categoryChartTitle: 'الإنفاق حسب الفئة',
+                categoryHint: 'اضغط على فئة لعرض تفاصيلها',
+                incomeVsExpensesTitle: 'الدخل والمصروفات شهرياً',
+                transactionsTitle: '📋 المعاملات',
+                searchPlaceholder: '🔍 ابحث: وصف، متجر، مبلغ...',
+                editHint: 'اضغط على أي معاملة لتعديلها أو حذفها',
+                showMore: 'عرض المزيد ({n})',
+                noMatches: 'لا توجد معاملات مطابقة',
+                of: 'من',
+                closeText: 'إغلاق اللوحة',
+                editTitle: 'تعديل المعاملة',
+                amount: 'المبلغ',
+                currency: 'العملة',
+                type: 'النوع',
+                category: 'الفئة',
+                date: 'التاريخ',
+                description: 'الوصف',
+                store: 'المتجر',
+                save: 'حفظ',
+                cancel: 'إلغاء',
+                delete: 'حذف',
+                deleteConfirm: 'حذف هذه المعاملة نهائياً؟',
+                invalidAmount: 'أدخل مبلغاً أكبر من صفر',
+                saveError: 'تعذر الحفظ: {error}',
+                deleteError: 'تعذر الحذف: {error}',
+                sessionExpired: 'انتهت الجلسة، أغلق اللوحة وافتحها مرة أخرى.',
+                types: { Expense: 'مصروف', Income: 'دخل', Transfer: 'تحويل' }
             },
             en: {
-                title: "💰 Expense Dashboard",
-                subtitle: "Your personal spending analytics",
-                loading: "Securely loading your expenses...",
-                emptyText: "No expenses yet",
-                emptyHint: "Start tracking by sending expenses to your bot!",
-                errorText: "Could not load expenses",
-                errorHint: "Please try again later",
-                labelMonth: "Month",
-                labelCategory: "Category",
-                labelCurrency: "Currency",
-                allMonths: "All Months",
-                allCategories: "All Categories",
-                allCurrencies: "All Currencies",
-                labelExpenses: "Expenses",
-                labelIncome: "Income",
-                labelNet: "Net",
-                labelCount: "Count",
-                comparisonTitle: "📊 Income vs Expenses",
-                incomeLabel: "💰 Income",
-                expenseLabel: "💸 Expenses",
-                balanceText: "Balance:",
-                trendChartTitle: "Daily Spending Trend",
-                categoryChartTitle: "Spending by Category",
-                currencyChartTitle: "Currency Distribution",
-                transactionsTitle: "📋 Transactions",
-                closeText: "Close Dashboard",
-                langButton: "العربية",
-                avgDayLabel: "Avg Daily",
-                maxDayLabel: "Highest Day",
-                totalDaysLabel: "Total Days",
-                minDayLabel: "Lowest Day"
+                title: '💰 Expense Dashboard',
+                subtitle: 'Your personal spending analytics',
+                loading: 'Securely loading your expenses...',
+                emptyText: 'No expenses yet',
+                emptyHint: 'Start tracking by sending expenses to your bot!',
+                errorText: 'Could not load expenses',
+                errorHint: 'Please try again later',
+                retry: 'Try again',
+                refresh: 'Refresh',
+                langButton: 'العربية',
+                labelMonth: 'Month',
+                labelCategory: 'Category',
+                labelCurrency: 'Currency',
+                allMonths: 'All months',
+                allCategories: 'All categories',
+                showIn: 'Show everything in {cur}',
+                only: '{cur} transactions only',
+                expenses: 'Expenses',
+                income: 'Income',
+                net: 'Net',
+                count: 'Transactions',
+                categorySpend: 'Category spending',
+                share: 'Of all spending',
+                avgPerTx: 'Average transaction',
+                vsMonth: 'vs {month}',
+                vsMonthPartial: 'vs same days of {month}',
+                fxNote: 'Converted at rates from {date}: {pairs}',
+                fxApprox: 'approximate',
+                comparisonTitle: '📊 Income vs Expenses',
+                incomeLabel: '💰 Income',
+                expenseLabel: '💸 Expenses',
+                balanceText: 'Balance:',
+                dailyTitle: 'Daily spending — {month}',
+                monthlyTitle: 'Monthly spending',
+                categoryTrendTitle: 'Monthly spending: {category}',
+                avgDay: 'Daily average',
+                maxDay: 'Highest day',
+                spendDays: 'Days with spending',
+                zeroDays: 'No-spend days',
+                avgMonth: 'Monthly average',
+                maxMonth: 'Highest month',
+                minMonth: 'Lowest month',
+                monthsCount: 'Months',
+                monthsWithSpend: 'Months with spending',
+                vsAverage: '{month} vs average',
+                categoryChartTitle: 'Spending by Category',
+                categoryHint: 'Tap a category to see its details',
+                incomeVsExpensesTitle: 'Income and expenses by month',
+                transactionsTitle: '📋 Transactions',
+                searchPlaceholder: '🔍 Search: description, store, amount...',
+                editHint: 'Tap any transaction to edit or delete it',
+                showMore: 'Show more ({n})',
+                noMatches: 'No matching transactions',
+                of: 'of',
+                closeText: 'Close Dashboard',
+                editTitle: 'Edit transaction',
+                amount: 'Amount',
+                currency: 'Currency',
+                type: 'Type',
+                category: 'Category',
+                date: 'Date',
+                description: 'Description',
+                store: 'Store',
+                save: 'Save',
+                cancel: 'Cancel',
+                delete: 'Delete',
+                deleteConfirm: 'Delete this transaction for good?',
+                invalidAmount: 'Enter an amount greater than zero',
+                saveError: 'Could not save: {error}',
+                deleteError: 'Could not delete: {error}',
+                sessionExpired: 'Your session expired. Close the dashboard and open it again.',
+                types: { Expense: 'Expense', Income: 'Income', Transfer: 'Transfer' }
             }
         };
-        
-        let currentLang = 'ar';
-        
-        function toggleLanguage() {
-            currentLang = currentLang === 'ar' ? 'en' : 'ar';
-            document.documentElement.lang = currentLang;
-            document.body.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            updateTranslations();
-            if (rawExpenses.length > 0 || rawIncome.length > 0) {
-                updateDashboard();
-            }
-        }
-        
-        function updateTranslations() {
-            const t = translations[currentLang];
-            document.getElementById('title').textContent = t.title;
-            document.getElementById('subtitle').textContent = t.subtitle;
-            document.getElementById('loadingText').textContent = t.loading;
-            document.getElementById('emptyText').textContent = t.emptyText;
-            document.getElementById('emptyHint').textContent = t.emptyHint;
-            document.getElementById('errorText').textContent = t.errorText;
-            document.querySelector('.lang-switch').textContent = t.langButton;
-            document.getElementById('label-month').textContent = t.labelMonth;
-            document.getElementById('label-category').textContent = t.labelCategory;
-            document.getElementById('label-currency').textContent = t.labelCurrency;
-            document.getElementById('label-expenses').textContent = t.labelExpenses;
-            document.getElementById('label-income').textContent = t.labelIncome;
-            document.getElementById('label-net').textContent = t.labelNet;
-            document.getElementById('label-count').textContent = t.labelCount;
-            document.getElementById('comparisonTitle').textContent = t.comparisonTitle;
-            document.getElementById('incomeLabel').textContent = t.incomeLabel;
-            document.getElementById('expenseLabel').textContent = t.expenseLabel;
-            document.getElementById('balanceText').textContent = t.balanceText;
-            document.getElementById('trendChartTitle').textContent = t.trendChartTitle;
-            document.getElementById('categoryChartTitle').textContent = t.categoryChartTitle;
-            document.getElementById('currencyChartTitle').textContent = t.currencyChartTitle;
-            document.getElementById('transactionsTitle').textContent = t.transactionsTitle;
-            document.getElementById('closeText').textContent = t.closeText;
-            document.getElementById('avgDayLabel').textContent = t.avgDayLabel;
-            document.getElementById('maxDayLabel').textContent = t.maxDayLabel;
-            document.getElementById('totalDaysLabel').textContent = t.totalDaysLabel;
-            document.getElementById('minDayLabel').textContent = t.minDayLabel;
-            
-            document.querySelector('#monthFilter option[value="all"]').textContent = t.allMonths;
-            document.querySelector('#categoryFilter option[value="all"]').textContent = t.allCategories;
-            document.querySelector('#currencyFilter option[value="all"]').textContent = t.allCurrencies;
-        }
-        
-        // Initialize Telegram
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
-        
-        const initData = tg.initData;
-        const telegramUser = tg.initDataUnsafe?.user;
-        const currentUsername = telegramUser?.username || telegramUser?.first_name || 'Unknown';
-        
-        document.getElementById('userInfo').textContent = `👤 ${currentUsername}`;
-        
-        // Supabase Edge Function: verifies Telegram's signed initData and returns only this user's transactions.
-        const WEBHOOK_URL = `https://ajdphdgkwycecmtlxqgv.supabase.co/functions/v1/dashboard-api?initData=${encodeURIComponent(initData)}`;
 
-        // Escape text that comes from users' messages before putting it into HTML.
+        const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#06b6d4', '#84cc16', '#f97316', '#14b8a6', '#a855f7', '#eab308'];
+        const EXTRA_CURRENCIES = ['EGP', 'USD', 'SAR', 'EUR', 'AED', 'GBP'];
+        const PAGE_SIZE = 50;
+
+        // Per-device preferences (language, display currency). Never used for data.
+        const prefs = {
+            get(key) { try { return localStorage.getItem('dash.' + key); } catch (e) { return null; } },
+            set(key, value) { try { localStorage.setItem('dash.' + key, value); } catch (e) { /* storage unavailable */ } }
+        };
+
+        const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+        const telegramLang = tgUser && tgUser.language_code ? (tgUser.language_code.startsWith('ar') ? 'ar' : 'en') : 'ar';
+
+        const state = {
+            lang: prefs.get('lang') || telegramLang,
+            currencyChoice: prefs.get('currency') || '',
+            month: null,
+            category: 'all',
+            search: '',
+            listLimit: PAGE_SIZE
+        };
+
+        let data = { items: [], rates: {}, categories: [], fxDate: '' };
+        let periodItemsCache = [];
+        let loadedAt = 0;
+        let loading = false;
+        let editing = null;
+        const charts = {};
+
+        // ---------- helpers ----------
+        const $ = (id) => document.getElementById(id);
         const esc = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
-        
-        const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#64748b', '#06b6d4', '#84cc16', '#f97316'];
-        
-        let rawExpenses = [];
-        let rawIncome = [];
-        let filteredExpenses = [];
-        let fullData = null;
-        let trendChart = null;
-        let categoryChart = null;
-        let currencyChart = null;
-        
-        async function loadExpenses() {
+        // Keep numbers like "17,311 EGP" or "1 USD = 55.37 EGP" in order inside Arabic sentences.
+        const ltr = (text) => '⁦' + text + '⁩';
+        const pad = (n) => String(n).padStart(2, '0');
+        const locale = () => (state.lang === 'ar' ? 'ar-EG' : 'en-US');
+
+        function t(key, vars) {
+            const text = I18N[state.lang][key] ?? I18N.en[key] ?? key;
+            return String(text).replace(/\{(\w+)\}/g, (_, name) => (vars && vars[name] !== undefined ? vars[name] : ''));
+        }
+
+        function haptic(kind) {
             try {
-                const response = await fetch(WEBHOOK_URL);
-                if (!response.ok) throw new Error('Failed to fetch');
-                
-                const data = await response.json();
-                fullData = Array.isArray(data) ? data[0] : data;
-                
-                document.getElementById('loadingState').style.display = 'none';
-                
-                if (fullData.error) {
-                    document.getElementById('errorState').style.display = 'flex';
-                    document.getElementById('errorMessage').textContent = fullData.error;
+                if (!tg || !tg.HapticFeedback) return;
+                if (kind === 'select') tg.HapticFeedback.selectionChanged();
+                else tg.HapticFeedback.notificationOccurred(kind);
+            } catch (e) { /* not supported */ }
+        }
+
+        function cssVar(name, fallback) {
+            return getComputedStyle(document.documentElement).getPropertyValue(name).trim() || fallback;
+        }
+
+        function todayIso() {
+            const d = new Date();
+            return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+        }
+
+        function addMonths(ym, n) {
+            const [y, m] = ym.split('-').map(Number);
+            const d = new Date(Date.UTC(y, m - 1 + n, 1));
+            return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}`;
+        }
+
+        function daysInMonth(ym) {
+            const [y, m] = ym.split('-').map(Number);
+            return new Date(Date.UTC(y, m, 0)).getUTCDate();
+        }
+
+        function addDaysIso(iso, n) {
+            const d = new Date(iso + 'T00:00:00Z');
+            d.setUTCDate(d.getUTCDate() + n);
+            return d.toISOString().slice(0, 10);
+        }
+
+        function monthRange(ym) {
+            return { from: ym + '-01', to: addMonths(ym, 1) + '-01' };
+        }
+
+        function monthName(ym, style) {
+            const [y, m] = ym.split('-').map(Number);
+            const options = style === 'short' ? { month: 'short' }
+                : style === 'shortYear' ? { month: 'short', year: '2-digit' }
+                : { month: 'long', year: 'numeric' };
+            return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(locale(), { ...options, timeZone: 'UTC' });
+        }
+
+        function dayName(iso, withWeekday) {
+            const options = withWeekday ? { weekday: 'short', month: 'short', day: 'numeric' } : { month: 'short', day: 'numeric' };
+            return new Date(iso + 'T12:00:00Z').toLocaleDateString(locale(), { ...options, timeZone: 'UTC' });
+        }
+
+        function fmtNum(n) {
+            const value = Number(n) || 0;
+            return value.toLocaleString('en-US', { maximumFractionDigits: Math.abs(value) >= 1000 ? 0 : 2 });
+        }
+
+        function fmtMoney(n, cur) {
+            const value = Number(n) || 0;
+            if (cur === 'USD') return `${value < 0 ? '-' : ''}$${fmtNum(Math.abs(value))}`;
+            return `${fmtNum(value)} ${cur}`;
+        }
+
+        function compact(n) {
+            return Number(n).toLocaleString('en-US', { notation: 'compact', maximumFractionDigits: 1 });
+        }
+
+        // Arabic-friendly search: fold letter variants and Arabic-Indic digits.
+        function normalize(text) {
+            return String(text ?? '').toLowerCase()
+                .replace(/[أإآ]/g, 'ا').replace(/ة/g, 'ه').replace(/ى/g, 'ي')
+                .replace(/[٠-٩]/g, d => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)));
+        }
+
+        function fillSelect(select, options, value) {
+            select.innerHTML = '';
+            options.forEach(([optionValue, label]) => {
+                const option = document.createElement('option');
+                option.value = optionValue;
+                option.textContent = label;
+                select.appendChild(option);
+            });
+            select.value = value;
+        }
+
+        // ---------- currency ----------
+        function currenciesByUse() {
+            const counts = {};
+            data.items.forEach(tx => { counts[tx.currency] = (counts[tx.currency] || 0) + 1; });
+            return Object.entries(counts).sort((a, b) => b[1] - a[1]).map(([cur]) => cur);
+        }
+
+        const unit = () => state.currencyChoice.split(':')[1];
+        const onlyMode = () => state.currencyChoice.startsWith('only:');
+
+        function convert(amount, from, to) {
+            if (from === to) return amount;
+            const a = data.rates[from];
+            const b = data.rates[to];
+            return a && b ? (amount / a) * b : 0;
+        }
+
+        const val = (tx) => convert(tx.amount, tx.currency, unit());
+        const total = (list) => list.reduce((sum, tx) => sum + val(tx), 0);
+        const ofType = (list, type) => list.filter(tx => tx.type === type);
+        const inRange = (tx, from, to) => tx.date >= from && tx.date < to;
+        const matchesCurrency = (tx) => !onlyMode() || tx.currency === unit();
+        const matchesCategory = (tx) => state.category === 'all' || tx.category === state.category;
+
+        // ---------- API ----------
+        async function api(body) {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData: tg ? tg.initData : '', ...body })
+            });
+            let json = null;
+            try { json = await res.json(); } catch (e) { /* not JSON */ }
+            if (res.status === 401 && body.action !== 'list') throw new Error(t('sessionExpired'));
+            if (!res.ok || !json || json.error) throw new Error((json && json.error) || `HTTP ${res.status}`);
+            return json;
+        }
+
+        function showView(view) {
+            $('loadingState').style.display = view === 'loading' ? 'flex' : 'none';
+            $('emptyState').style.display = view === 'empty' ? 'flex' : 'none';
+            $('errorState').style.display = view === 'error' ? 'flex' : 'none';
+            $('content').classList.toggle('hidden', view !== 'content');
+            $('filtersContainer').classList.toggle('hidden', view !== 'content');
+        }
+
+        async function load(silent) {
+            if (loading) return;
+            loading = true;
+            $('refreshButton').classList.add('spinning');
+            if (!silent) showView('loading');
+            try {
+                const res = await api({ action: 'list' });
+                data = {
+                    items: [...(res.rawExpenses || []), ...(res.rawIncome || []), ...(res.rawTransfers || [])],
+                    rates: res.rates || {},
+                    categories: res.categories || [],
+                    fxDate: res.fxDate || ''
+                };
+                loadedAt = Date.now();
+                if (!data.items.length) {
+                    showView('empty');
                     return;
                 }
-                
-                if (fullData.isEmpty) {
-                    document.getElementById('emptyState').style.display = 'flex';
-                    return;
-                }
-                
-                rawExpenses = fullData.rawExpenses || [];
-                rawIncome = fullData.rawIncome || [];
                 populateFilters();
-                updateDashboard();
-                
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('errorState').style.display = 'flex';
+                showView('content');
+                render();
+            } catch (err) {
+                if (!silent || !data.items.length) {
+                    $('errorMessage').textContent = err.message || t('errorHint');
+                    showView('error');
+                }
+            } finally {
+                loading = false;
+                $('refreshButton').classList.remove('spinning');
             }
         }
-        
+
+        // ---------- filters ----------
         function populateFilters() {
-            const allTransactions = [...rawExpenses, ...rawIncome];
-            const months = [...new Set(allTransactions.map(e => e.date.substring(0, 7)))].sort().reverse();
-            const categories = [...new Set(rawExpenses.map(e => e.category))].sort();
-            const currencies = [...new Set(allTransactions.map(e => e.currency))].sort();
-            
-            const monthFilter = document.getElementById('monthFilter');
-            months.forEach(month => {
-                const opt = document.createElement('option');
-                opt.value = month;
-                const date = new Date(month + '-01');
-                opt.textContent = date.toLocaleString(currentLang === 'ar' ? 'ar' : 'en', { month: 'long', year: 'numeric' });
-                monthFilter.appendChild(opt);
-            });
-            
-            const categoryFilter = document.getElementById('categoryFilter');
-            categories.forEach(cat => {
-                const opt = document.createElement('option');
-                opt.value = cat;
-                opt.textContent = cat;
-                categoryFilter.appendChild(opt);
-            });
-            
-            const currencyFilter = document.getElementById('currencyFilter');
-            currencies.forEach(curr => {
-                const opt = document.createElement('option');
-                opt.value = curr;
-                opt.textContent = `${curr} ${currentLang === 'ar' ? 'فقط' : 'Only'}`;
-                currencyFilter.appendChild(opt);
-            });
-            
-            document.getElementById('filtersContainer').style.display = 'grid';
-            
-            monthFilter.addEventListener('change', updateDashboard);
-            categoryFilter.addEventListener('change', updateDashboard);
-            currencyFilter.addEventListener('change', updateDashboard);
+            const currentYm = todayIso().slice(0, 7);
+            const months = [...new Set([currentYm, ...data.items.map(tx => tx.date.slice(0, 7))])].sort().reverse();
+            if (!state.month || (state.month !== 'all' && !months.includes(state.month))) state.month = currentYm;
+            fillSelect($('monthFilter'), [['all', t('allMonths')], ...months.map(m => [m, monthName(m)])], state.month);
+
+            const categories = [...new Set(ofType(data.items, 'Expense').map(tx => tx.category))].sort();
+            if (state.category !== 'all' && !categories.includes(state.category)) state.category = 'all';
+            fillSelect($('categoryFilter'), [['all', t('allCategories')], ...categories.map(c => [c, c])], state.category);
+
+            const used = currenciesByUse();
+            const options = [...new Set([...used, 'USD'])].map(cur => ['all:' + cur, t('showIn', { cur })]);
+            if (used.length > 1) used.forEach(cur => options.push(['only:' + cur, t('only', { cur })]));
+            if (!options.some(([value]) => value === state.currencyChoice)) state.currencyChoice = 'all:' + (used[0] || 'EGP');
+            fillSelect($('currencyFilter'), options, state.currencyChoice);
         }
-        
-        function updateDashboard() {
-            const monthVal = document.getElementById('monthFilter').value;
-            const categoryVal = document.getElementById('categoryFilter').value;
-            const currencyVal = document.getElementById('currencyFilter').value;
-            
-            filteredExpenses = rawExpenses.filter(exp => {
-                const monthMatch = monthVal === 'all' || exp.date.startsWith(monthVal);
-                const categoryMatch = categoryVal === 'all' || exp.category === categoryVal;
-                const currencyMatch = currencyVal === 'all' || exp.currency === currencyVal;
-                return monthMatch && categoryMatch && currencyMatch;
-            });
-            
-            const filteredIncome = rawIncome.filter(inc => {
-                const monthMatch = monthVal === 'all' || inc.date.startsWith(monthVal);
-                const currencyMatch = currencyVal === 'all' || inc.currency === currencyVal;
-                return monthMatch && currencyMatch;
-            });
-            
-            updateKPIs(filteredExpenses, filteredIncome);
-            updateComparison(filteredExpenses, filteredIncome);
-            updateTrendChart(filteredExpenses);
-            updateCategoryChart(filteredExpenses);
-            updateCurrencyChart(filteredExpenses, filteredIncome);
-            updateTransactions(filteredExpenses, filteredIncome);
-            
-            document.getElementById('kpiGrid').style.display = 'grid';
-            document.getElementById('comparisonCard').style.display = 'block';
-            document.getElementById('chartSection').style.display = 'block';
-            document.getElementById('tableSection').style.display = 'block';
+
+        // ---------- rendering ----------
+        function render() {
+            const catMode = state.category !== 'all';
+            const pool = data.items.filter(tx => matchesCurrency(tx) && matchesCategory(tx));
+            const range = state.month === 'all' ? null : monthRange(state.month);
+            const periodItems = range ? pool.filter(tx => inRange(tx, range.from, range.to)) : pool;
+            periodItemsCache = periodItems;
+
+            renderKpis(pool, periodItems, catMode);
+            renderFxNote(periodItems);
+            $('comparisonCard').classList.toggle('hidden', catMode);
+            $('categoryCard').classList.toggle('hidden', catMode);
+            $('monthlyCard').classList.toggle('hidden', catMode);
+            if (!catMode) {
+                renderComparison(periodItems);
+                renderCategories(periodItems);
+                renderMonthly(pool);
+            }
+            renderTrend(pool, catMode);
+            renderList();
         }
-        
-        function updateKPIs(expenses, income) {
-            const totalExp = expenses.reduce((sum, e) => sum + e.amountUSD, 0);
-            const totalInc = income.reduce((sum, i) => sum + i.amountUSD, 0);
-            const net = totalInc - totalExp;
-            
-            document.getElementById('totalExpenses').textContent = `$${totalExp.toFixed(2)}`;
-            document.getElementById('totalIncome').textContent = `$${totalInc.toFixed(2)}`;
-            document.getElementById('netAmount').textContent = `$${net.toFixed(2)}`;
-            document.getElementById('netAmount').style.color = net >= 0 ? '#10b981' : '#ef4444';
-            document.getElementById('transactionCount').textContent = expenses.length + income.length;
+
+        // Previous period to compare with. For the current month, compare with the same days of last month.
+        function comparisonPeriod() {
+            if (state.month === 'all') return null;
+            const prev = addMonths(state.month, -1);
+            const today = todayIso();
+            if (state.month !== today.slice(0, 7)) return { ...monthRange(prev), label: t('vsMonth', { month: monthName(prev, 'short') }) };
+            const day = Math.min(Number(today.slice(8, 10)), daysInMonth(prev));
+            return { from: prev + '-01', to: addDaysIso(`${prev}-${pad(day)}`, 1), label: t('vsMonthPartial', { month: monthName(prev, 'short') }) };
         }
-        
-        function updateComparison(expenses, income) {
-            const totalExp = expenses.reduce((sum, e) => sum + e.amountUSD, 0);
-            const totalInc = income.reduce((sum, i) => sum + i.amountUSD, 0);
-            const net = totalInc - totalExp;
-            const max = Math.max(totalExp, totalInc, 1);
-            
-            const incomePercent = (totalInc / max * 100).toFixed(0);
-            const expensePercent = (totalExp / max * 100).toFixed(0);
-            
-            document.getElementById('incomeBarAmount').textContent = `$${totalInc.toFixed(2)}`;
-            document.getElementById('expenseBarAmount').textContent = `$${totalExp.toFixed(2)}`;
-            
-            const incomeBar = document.getElementById('incomeBar');
-            const expenseBar = document.getElementById('expenseBar');
-            
-            incomeBar.style.width = incomePercent + '%';
-            incomeBar.textContent = incomePercent + '%';
-            
-            expenseBar.style.width = expensePercent + '%';
-            expenseBar.textContent = expensePercent + '%';
-            
-            const balanceIndicator = document.getElementById('balanceIndicator');
-            balanceIndicator.className = 'balance-indicator ' + (net >= 0 ? 'positive' : 'negative');
-            document.getElementById('balanceValue').textContent = `$${Math.abs(net).toFixed(2)}`;
+
+        function deltaHtml(current, previous, goodWhenUp, period, asMoney) {
+            if (!period) return '';
+            const label = esc(period.label);
+            if (asMoney) {
+                const diff = current - previous;
+                if (Math.abs(diff) < 0.005) return `= ${label}`;
+                const cls = (diff > 0) === goodWhenUp ? 'good' : 'bad';
+                return `<span class="${cls}">${esc(ltr(`${diff > 0 ? '▲' : '▼'} ${fmtMoney(Math.abs(diff), unit())}`))} ${label}</span>`;
+            }
+            if (!previous) return '';
+            const pct = ((current - previous) / Math.abs(previous)) * 100;
+            if (Math.abs(pct) < 0.5) return `= ${label}`;
+            const cls = goodWhenUp === null ? '' : ((pct > 0) === goodWhenUp ? 'good' : 'bad');
+            return `<span class="${cls}">${esc(ltr(`${pct > 0 ? '▲' : '▼'} ${Math.abs(pct).toFixed(0)}%`))} ${label}</span>`;
         }
-        
-        function updateTrendChart(expenses) {
-            // Group by date
-            const dailyData = {};
-            expenses.forEach(exp => {
-                if (!dailyData[exp.date]) {
-                    dailyData[exp.date] = 0;
-                }
-                dailyData[exp.date] += exp.amountUSD;
+
+        function renderKpis(pool, periodItems, catMode) {
+            const cur = unit();
+            const period = comparisonPeriod();
+            const prevItems = period ? pool.filter(tx => inRange(tx, period.from, period.to)) : [];
+            const expenses = ofType(periodItems, 'Expense');
+            const income = ofType(periodItems, 'Income');
+            const prevExpenses = ofType(prevItems, 'Expense');
+            const prevIncome = ofType(prevItems, 'Income');
+            const spent = total(expenses);
+            let cards;
+
+            if (!catMode) {
+                const earned = total(income);
+                const net = earned - spent;
+                cards = [
+                    { icon: '💸', label: t('expenses'), value: fmtMoney(spent, cur), delta: deltaHtml(spent, total(prevExpenses), false, period) },
+                    { icon: '💰', label: t('income'), value: fmtMoney(earned, cur), delta: deltaHtml(earned, total(prevIncome), true, period) },
+                    { icon: '📊', label: t('net'), value: fmtMoney(net, cur), color: net >= 0 ? '#10b981' : '#ef4444',
+                      delta: deltaHtml(net, total(prevIncome) - total(prevExpenses), true, period, true) },
+                    { icon: '📝', label: t('count'), value: fmtNum(periodItems.length), delta: deltaHtml(periodItems.length, prevItems.length, null, period) }
+                ];
+            } else {
+                const range = state.month === 'all' ? null : monthRange(state.month);
+                const allSpending = total(data.items.filter(tx => tx.type === 'Expense' && matchesCurrency(tx) && (!range || inRange(tx, range.from, range.to))));
+                const share = allSpending ? (spent / allSpending) * 100 : 0;
+                cards = [
+                    { icon: '💸', label: t('categorySpend'), value: fmtMoney(spent, cur), delta: deltaHtml(spent, total(prevExpenses), false, period) },
+                    { icon: '🥧', label: t('share'), value: share.toFixed(share < 10 ? 1 : 0) + '%' },
+                    { icon: '📝', label: t('count'), value: fmtNum(expenses.length), delta: deltaHtml(expenses.length, prevExpenses.length, null, period) },
+                    { icon: '🧮', label: t('avgPerTx'), value: expenses.length ? fmtMoney(spent / expenses.length, cur) : '—' }
+                ];
+            }
+
+            cards.forEach((card, i) => {
+                $('kpiIcon' + i).textContent = card.icon;
+                $('kpiLabel' + i).textContent = card.label;
+                $('kpiValue' + i).textContent = card.value;
+                $('kpiValue' + i).style.color = card.color || '';
+                $('kpiDelta' + i).innerHTML = card.delta || '';
             });
-            
-            const sortedDates = Object.keys(dailyData).sort();
-            const amounts = sortedDates.map(date => dailyData[date]);
-            
-            // Calculate stats
-            const avgDaily = amounts.length > 0 ? amounts.reduce((a, b) => a + b, 0) / amounts.length : 0;
-            const maxDaily = amounts.length > 0 ? Math.max(...amounts) : 0;
-            const minDaily = amounts.length > 0 ? Math.min(...amounts) : 0;
-            
-            document.getElementById('avgDayValue').textContent = `$${avgDaily.toFixed(2)}`;
-            document.getElementById('maxDayValue').textContent = `$${maxDaily.toFixed(2)}`;
-            document.getElementById('minDayValue').textContent = `$${minDaily.toFixed(2)}`;
-            document.getElementById('totalDaysValue').textContent = sortedDates.length;
-            
-            // Create chart
-            if (trendChart) trendChart.destroy();
-            const ctx = document.getElementById('trendChart').getContext('2d');
-            trendChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: sortedDates.map(date => {
-                        const d = new Date(date);
-                        return d.toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en', { month: 'short', day: 'numeric' });
-                    }),
-                    datasets: [{
-                        label: currentLang === 'ar' ? 'الإنفاق اليومي' : 'Daily Spending',
-                        data: amounts,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointHoverRadius: 6
-                    }]
+        }
+
+        function renderFxNote(periodItems) {
+            const note = $('fxNote');
+            const cur = unit();
+            const others = onlyMode() ? [] : [...new Set(periodItems.map(tx => tx.currency))].filter(c => c !== cur && data.rates[c]);
+            if (!others.length || !data.rates[cur]) {
+                note.classList.add('hidden');
+                return;
+            }
+            const pairs = others.map(c => {
+                const rate = convert(1, c, cur);
+                return rate >= 1 ? `1 ${c} = ${fmtNum(rate)} ${cur}` : `1 ${cur} = ${fmtNum(convert(1, cur, c))} ${c}`;
+            }).join(' · ');
+            const parsed = data.fxDate && data.fxDate !== 'fallback' ? new Date(data.fxDate) : null;
+            const date = parsed && !isNaN(parsed) ? parsed.toLocaleDateString(locale(), { day: 'numeric', month: 'short' }) : t('fxApprox');
+            note.textContent = '💱 ' + t('fxNote', { date, pairs: ltr(pairs) });
+            note.classList.remove('hidden');
+        }
+
+        function renderComparison(periodItems) {
+            const cur = unit();
+            const spent = total(ofType(periodItems, 'Expense'));
+            const earned = total(ofType(periodItems, 'Income'));
+            const max = Math.max(spent, earned, 1);
+            const incomePct = Math.round((earned / max) * 100);
+            const expensePct = Math.round((spent / max) * 100);
+            $('incomeBarAmount').textContent = fmtMoney(earned, cur);
+            $('expenseBarAmount').textContent = fmtMoney(spent, cur);
+            $('incomeBar').style.width = incomePct + '%';
+            $('incomeBar').textContent = incomePct + '%';
+            $('expenseBar').style.width = expensePct + '%';
+            $('expenseBar').textContent = expensePct + '%';
+            const net = earned - spent;
+            $('balanceIndicator').className = 'balance-indicator ' + (net >= 0 ? 'positive' : 'negative');
+            $('balanceValue').textContent = fmtMoney(net, cur);
+        }
+
+        function drawChart(key, canvasId, config) {
+            if (charts[key]) charts[key].destroy();
+            charts[key] = null;
+            if (!window.Chart) return;
+            charts[key] = new Chart($(canvasId).getContext('2d'), config);
+        }
+
+        function barOptions(cur, extra) {
+            return {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 250 },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { callbacks: { label: ctx => `${ctx.dataset.label ? ctx.dataset.label + ': ' : ''}${fmtMoney(ctx.parsed.y, cur)}` } }
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => `$${context.parsed.y.toFixed(2)}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: (value) => '$' + value
-                            }
-                        }
-                    }
-                }
-            });
+                scales: {
+                    x: { grid: { display: false }, ticks: { maxRotation: 0, autoSkip: true, autoSkipPadding: 6 } },
+                    y: { beginAtZero: true, ticks: { callback: value => compact(value) } }
+                },
+                ...(extra || {})
+            };
         }
-        
-        function updateCategoryChart(expenses) {
-            const categoryTotals = {};
-            expenses.forEach(exp => {
-                categoryTotals[exp.category] = (categoryTotals[exp.category] || 0) + exp.amountUSD;
+
+        function monthSpan(pool) {
+            const currentYm = todayIso().slice(0, 7);
+            const yms = pool.map(tx => tx.date.slice(0, 7));
+            const first = yms.length ? yms.reduce((a, b) => (a < b ? a : b)) : currentYm;
+            const last = [currentYm, ...yms].reduce((a, b) => (a > b ? a : b));
+            const end = state.month === 'all' ? last : state.month;
+            const start = state.month === 'all' ? (first < end ? first : end) : addMonths(end, -11);
+            const months = [];
+            for (let m = start; m <= end; m = addMonths(m, 1)) months.push(m);
+            return months.slice(-36);
+        }
+
+        function renderTrend(pool, catMode) {
+            const cur = unit();
+            const expenses = ofType(pool, 'Expense');
+            const today = todayIso();
+            const currentYm = today.slice(0, 7);
+            let labels;
+            let values;
+            let highlight = -1;
+            let stats;
+
+            if (!catMode && state.month !== 'all') {
+                const ym = state.month;
+                const monthExpenses = expenses.filter(tx => tx.date.startsWith(ym));
+                const lastDataDay = monthExpenses.reduce((max, tx) => Math.max(max, Number(tx.date.slice(8, 10))), 0);
+                const days = ym === currentYm ? Math.max(Number(today.slice(8, 10)), lastDataDay) : daysInMonth(ym);
+                values = new Array(days).fill(0);
+                monthExpenses.forEach(tx => { values[Number(tx.date.slice(8, 10)) - 1] += val(tx); });
+                labels = values.map((_, i) => String(i + 1));
+                const spent = values.reduce((a, b) => a + b, 0);
+                const spendDays = values.filter(v => v > 0).length;
+                const maxValue = Math.max(0, ...values);
+                $('trendTitle').textContent = t('dailyTitle', { month: monthName(ym) });
+                stats = [
+                    [t('avgDay'), fmtMoney(days ? spent / days : 0, cur)],
+                    [t('maxDay'), maxValue ? fmtMoney(maxValue, cur) : '—', maxValue ? dayName(`${ym}-${pad(values.indexOf(maxValue) + 1)}`) : ''],
+                    [t('spendDays'), `${spendDays} / ${days}`],
+                    [t('zeroDays'), String(days - spendDays)]
+                ];
+            } else {
+                const months = monthSpan(pool);
+                values = months.map(m => total(expenses.filter(tx => tx.date.startsWith(m))));
+                const spansYears = months.length && months[0].slice(0, 4) !== months[months.length - 1].slice(0, 4);
+                labels = months.map(m => monthName(m, spansYears ? 'shortYear' : 'short'));
+                highlight = state.month === 'all' ? -1 : months.indexOf(state.month);
+
+                // Averages use complete months only (the current month is still running).
+                const complete = months.map((m, i) => [m, values[i]]).filter(([m]) => m < currentYm);
+                const basis = complete.length ? complete : months.map((m, i) => [m, values[i]]);
+                const average = basis.reduce((sum, [, v]) => sum + v, 0) / (basis.length || 1);
+                const maxIndex = values.indexOf(Math.max(0, ...values));
+                const lowest = basis.reduce((low, entry) => (low === null || entry[1] < low[1] ? entry : low), null);
+
+                $('trendTitle').textContent = catMode ? t('categoryTrendTitle', { category: state.category }) : t('monthlyTitle');
+                if (!catMode) {
+                    stats = [
+                        [t('avgMonth'), fmtMoney(average, cur)],
+                        [t('maxMonth'), fmtMoney(values[maxIndex] || 0, cur), months[maxIndex] ? monthName(months[maxIndex]) : ''],
+                        [t('minMonth'), lowest ? fmtMoney(lowest[1], cur) : '—', lowest ? monthName(lowest[0]) : ''],
+                        [t('monthsCount'), String(months.length)]
+                    ];
+                } else {
+                    const selected = highlight >= 0 ? values[highlight] : null;
+                    const vsAverage = selected !== null && average > 0 ? ((selected - average) / average) * 100 : null;
+                    stats = [
+                        [t('avgMonth'), fmtMoney(average, cur)],
+                        [t('maxMonth'), fmtMoney(values[maxIndex] || 0, cur), months[maxIndex] ? monthName(months[maxIndex]) : ''],
+                        [t('monthsWithSpend'), `${values.filter(v => v > 0).length} / ${months.length}`],
+                        [t('vsAverage', { month: highlight >= 0 ? monthName(months[highlight], 'short') : '' }),
+                         vsAverage === null ? '—' : `${vsAverage > 0 ? '▲' : '▼'} ${Math.abs(vsAverage).toFixed(0)}%`]
+                    ];
+                }
+            }
+
+            const colors = values.map((_, i) => (highlight < 0 || i === highlight ? '#3b82f6' : 'rgba(59, 130, 246, 0.35)'));
+            drawChart('trend', 'trendChart', {
+                type: 'bar',
+                data: { labels, datasets: [{ data: values, backgroundColor: colors, borderRadius: 4, maxBarThickness: 26 }] },
+                options: barOptions(cur)
             });
-            
-            const sorted = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]).slice(0, 10);
-            const labels = sorted.map(([cat]) => cat);
-            const values = sorted.map(([, val]) => val);
-            const total = values.reduce((a, b) => a + b, 0);
-            
-            if (categoryChart) categoryChart.destroy();
-            const ctx = document.getElementById('categoryChart').getContext('2d');
-            categoryChart = new Chart(ctx, {
+
+            $('trendStats').innerHTML = stats.map(([label, value, sub]) => `
+                <div class="trend-stat">
+                    <div class="trend-stat-label">${esc(label)}</div>
+                    <div class="trend-stat-value">${esc(value)}</div>
+                    ${sub ? `<div class="trend-stat-sub">${esc(sub)}</div>` : ''}
+                </div>`).join('');
+        }
+
+        function selectCategory(category) {
+            state.category = category;
+            state.listLimit = PAGE_SIZE;
+            $('categoryFilter').value = category;
+            haptic('select');
+            render();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderCategories(periodItems) {
+            const cur = unit();
+            const sums = {};
+            ofType(periodItems, 'Expense').forEach(tx => { sums[tx.category] = (sums[tx.category] || 0) + val(tx); });
+            const sorted = Object.entries(sums).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+            const sum = sorted.reduce((s, [, v]) => s + v, 0) || 1;
+            $('categoryHint').textContent = t('categoryHint');
+
+            drawChart('category', 'categoryChart', {
                 type: 'doughnut',
                 data: {
-                    labels: labels,
-                    datasets: [{ data: values, backgroundColor: COLORS, borderWidth: 0 }]
+                    labels: sorted.map(([c]) => c),
+                    datasets: [{ data: sorted.map(([, v]) => v), backgroundColor: sorted.map((_, i) => COLORS[i % COLORS.length]), borderWidth: 0 }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { 
+                    cutout: '65%',
+                    animation: { duration: 250 },
+                    plugins: {
                         legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: (context) => {
-                                    const value = context.parsed;
-                                    const percentage = ((value / total) * 100).toFixed(1);
-                                    return `${context.label}: $${value.toFixed(2)} (${percentage}%)`;
-                                }
-                            }
-                        }
+                        tooltip: { callbacks: { label: ctx => `${ctx.label}: ${fmtMoney(ctx.parsed, cur)}` } }
                     },
-                    cutout: '65%'
+                    onClick: (_, elements) => { if (elements.length) selectCategory(sorted[elements[0].index][0]); }
                 }
             });
-            
-            const listContainer = document.getElementById('categoryList');
-            listContainer.innerHTML = '';
-            sorted.forEach(([category, value], index) => {
-                const percentage = ((value / total) * 100).toFixed(1);
-                const color = COLORS[index % COLORS.length];
-                const item = document.createElement('div');
-                item.className = 'category-item';
-                item.innerHTML = `
+
+            $('categoryList').innerHTML = sorted.map(([category, value], i) => `
+                <div class="category-item" data-category="${esc(category)}" role="button" tabindex="0">
                     <div class="category-left">
-                        <div class="category-color" style="background-color: ${color}"></div>
+                        <div class="category-color" style="background-color: ${COLORS[i % COLORS.length]}"></div>
                         <div class="category-name">${esc(category)}</div>
                     </div>
                     <div class="category-right">
-                        <div class="category-amount">$${value.toFixed(2)}</div>
-                        <div class="category-percentage">${percentage}%</div>
+                        <div class="category-amount">${esc(fmtMoney(value, cur))}</div>
+                        <div class="category-percentage">${((value / sum) * 100).toFixed(1)}%</div>
                     </div>
-                `;
-                listContainer.appendChild(item);
-            });
+                </div>`).join('');
         }
-        
-        function updateCurrencyChart(expenses, income) {
-            const allTransactions = [...expenses, ...income];
-            const currencyTotals = {};
-            
-            allTransactions.forEach(trans => {
-                currencyTotals[trans.currency] = (currencyTotals[trans.currency] || 0) + trans.amount;
-            });
-            
-            const sorted = Object.entries(currencyTotals).sort((a, b) => b[1] - a[1]);
-            const labels = sorted.map(([curr]) => curr);
-            const values = sorted.map(([, val]) => val);
-            
-            if (currencyChart) currencyChart.destroy();
-            const ctx = document.getElementById('currencyChart').getContext('2d');
-            currencyChart = new Chart(ctx, {
+
+        function renderMonthly(pool) {
+            const cur = unit();
+            const months = monthSpan(pool).slice(-12);
+            const spansYears = months.length && months[0].slice(0, 4) !== months[months.length - 1].slice(0, 4);
+            const sumFor = (type, m) => total(pool.filter(tx => tx.type === type && tx.date.startsWith(m)));
+            $('monthlyTitle').textContent = t('incomeVsExpensesTitle');
+            drawChart('monthly', 'monthlyChart', {
                 type: 'bar',
                 data: {
-                    labels: labels,
-                    datasets: [{
-                        label: currentLang === 'ar' ? 'المبلغ' : 'Amount',
-                        data: values,
-                        backgroundColor: COLORS,
-                        borderRadius: 8
-                    }]
+                    labels: months.map(m => monthName(m, spansYears ? 'shortYear' : 'short')),
+                    datasets: [
+                        { label: t('income'), data: months.map(m => sumFor('Income', m)), backgroundColor: '#10b981', borderRadius: 4, maxBarThickness: 18 },
+                        { label: t('expenses'), data: months.map(m => sumFor('Expense', m)), backgroundColor: '#ef4444', borderRadius: 4, maxBarThickness: 18 }
+                    ]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                options: barOptions(cur, {
                     plugins: {
-                        legend: { display: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true }
+                        legend: { display: true, position: 'bottom', labels: { boxWidth: 12, boxHeight: 12 } },
+                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmtMoney(ctx.parsed.y, cur)}` } }
                     }
-                }
-            });
-            
-            // Currency grid
-            const currencyFlags = { 'EGP': '🇪🇬', 'USD': '🇺🇸', 'EUR': '🇪🇺', 'GBP': '🇬🇧', 'CAD': '🇨🇦', 'INR': '🇮🇳' };
-            const gridContainer = document.getElementById('currencyGrid');
-            gridContainer.innerHTML = '';
-            
-            sorted.forEach(([currency, amount]) => {
-                const item = document.createElement('div');
-                item.className = 'currency-item';
-                item.innerHTML = `
-                    <div class="currency-flag">${currencyFlags[currency] || '💱'}</div>
-                    <div class="currency-code">${esc(currency)}</div>
-                    <div class="currency-amount">${amount.toLocaleString()}</div>
-                `;
-                gridContainer.appendChild(item);
+                })
             });
         }
-        
-        function updateTransactions(expenses, income) {
-            const allTransactions = [...expenses.map(e => ({...e, type: 'expense'})), ...income.map(i => ({...i, type: 'income'}))];
-            allTransactions.sort((a, b) => b.date.localeCompare(a.date));
-            
-            const listContainer = document.getElementById('transactionList');
-            listContainer.innerHTML = '';
-            
-            allTransactions.forEach(trans => {
-                const currencyClass = trans.currency === 'EGP' ? 'egp' : trans.currency === 'USD' ? 'usd' : 'other';
-                const typeClass = trans.type === 'income' ? 'income' : currencyClass;
-                const typeIcon = trans.type === 'income' ? '↗️' : '↙️';
-                
-                const date = new Date(trans.date);
-                const formattedDate = date.toLocaleDateString(currentLang === 'ar' ? 'ar' : 'en', { month: 'short', day: 'numeric' });
-                
-                const item = document.createElement('div');
-                item.className = 'transaction-item';
-                item.innerHTML = `
+
+        function transactionHtml(tx) {
+            const isIncome = tx.type === 'Income';
+            const isTransfer = tx.type === 'Transfer';
+            const icon = isIncome ? '↗️' : isTransfer ? '🔁' : '↙️';
+            const badge = isIncome ? 'income' : isTransfer ? 'transfer' : tx.currency === 'EGP' ? 'egp' : tx.currency === 'USD' ? 'usd' : 'other';
+            return `
+                <div class="transaction-item" data-id="${tx.id}" role="button" tabindex="0">
                     <div class="transaction-header">
-                        <div class="transaction-category">${typeIcon} ${esc(trans.category)}</div>
+                        <div class="transaction-category">${icon} ${esc(tx.category)}</div>
                         <div class="transaction-amount-wrapper">
-                            <div class="transaction-amount">${trans.amount.toLocaleString()}</div>
-                            <span class="currency-badge ${typeClass}">${esc(trans.currency)}</span>
+                            <div class="transaction-amount">${esc(fmtNum(tx.amount))}</div>
+                            <span class="currency-badge ${badge}">${esc(tx.currency)}</span>
                         </div>
                     </div>
-                    <div class="transaction-details">
-                        <div>${esc(trans.description)}</div>
-                        <div>${formattedDate}</div>
-                    </div>
-                    ${trans.store ? `<div class="transaction-store">🏪 ${esc(trans.store)}</div>` : ''}
-                `;
-                listContainer.appendChild(item);
-            });
-            
-            document.getElementById('filterStatus').textContent = `${allTransactions.length} ${currentLang === 'ar' ? 'من' : 'of'} ${rawExpenses.length + rawIncome.length}`;
+                    <div class="transaction-details">${esc(tx.description || '—')}</div>
+                    ${tx.store ? `<div class="transaction-store">🏪 ${esc(tx.store)}</div>` : ''}
+                </div>`;
         }
-        
-        loadExpenses();
+
+        function renderList() {
+            const query = normalize(state.search.trim());
+            let list = periodItemsCache;
+            if (query) {
+                list = list.filter(tx => normalize(`${tx.description} ${tx.store} ${tx.category} ${tx.raw} ${tx.amount} ${tx.date}`).includes(query));
+            }
+            list = [...list].sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+
+            const daySpend = {};
+            ofType(list, 'Expense').forEach(tx => { daySpend[tx.date] = (daySpend[tx.date] || 0) + val(tx); });
+
+            const shown = list.slice(0, state.listLimit);
+            let html = '';
+            let currentDay = null;
+            shown.forEach(tx => {
+                if (tx.date !== currentDay) {
+                    currentDay = tx.date;
+                    const spent = daySpend[tx.date];
+                    html += `<div class="day-header"><span>${esc(dayName(tx.date, true))}</span><span class="day-total">${spent ? '➖ ' + esc(fmtMoney(spent, unit())) : ''}</span></div>`;
+                }
+                html += transactionHtml(tx);
+            });
+
+            $('transactionList').innerHTML = html || `<div class="list-empty">${esc(t('noMatches'))}</div>`;
+            $('filterStatus').textContent = `${fmtNum(list.length)} ${t('of')} ${fmtNum(data.items.length)}`;
+            const remaining = list.length - shown.length;
+            $('moreButton').classList.toggle('hidden', remaining <= 0);
+            $('moreButton').textContent = t('showMore', { n: fmtNum(Math.min(remaining, PAGE_SIZE)) + (remaining > PAGE_SIZE ? ' / ' + fmtNum(remaining) : '') });
+        }
+
+        // ---------- edit sheet ----------
+        function setType(type) {
+            $('editType').dataset.value = type;
+            document.querySelectorAll('#editType button').forEach(b => b.classList.toggle('active', b.dataset.type === type));
+        }
+
+        function setSheetBusy(busy) {
+            ['saveButton', 'deleteButton', 'cancelButton'].forEach(id => { $(id).disabled = busy; });
+        }
+
+        function showSheetError(message) {
+            $('sheetError').textContent = message;
+            $('sheetError').classList.remove('hidden');
+        }
+
+        function openSheet(tx) {
+            editing = tx;
+            // Photo and voice entries already start with 📷 / 🎤 in the saved text.
+            const sourceIcon = { csv_import: '📄 ', text: '💬 ' }[tx.source] || '';
+            $('sheetRaw').textContent = tx.raw ? sourceIcon + tx.raw : '';
+            $('sheetRaw').classList.toggle('hidden', !tx.raw);
+            $('editAmount').value = tx.amount;
+            fillSelect($('editCurrency'), [...new Set([tx.currency, ...currenciesByUse(), ...EXTRA_CURRENCIES])].map(c => [c, c]), tx.currency);
+            setType(tx.type);
+            fillSelect($('editCategory'), [...new Set([tx.category, ...data.categories])].map(c => [c, c]), tx.category);
+            $('editDate').value = tx.date;
+            $('editDescription').value = tx.description || '';
+            $('editStore').value = tx.store || '';
+            $('sheetError').classList.add('hidden');
+            setSheetBusy(false);
+            $('sheetBackdrop').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (tg && tg.BackButton) {
+                tg.BackButton.onClick(closeSheet);
+                tg.BackButton.show();
+            }
+        }
+
+        function closeSheet() {
+            editing = null;
+            $('sheetBackdrop').classList.add('hidden');
+            document.body.style.overflow = '';
+            if (tg && tg.BackButton) {
+                tg.BackButton.offClick(closeSheet);
+                tg.BackButton.hide();
+            }
+        }
+
+        function afterChange() {
+            populateFilters();
+            render();
+        }
+
+        async function saveEdit() {
+            if (!editing) return;
+            const tx = editing;
+            const amount = Number($('editAmount').value);
+            if (!(amount > 0)) {
+                showSheetError(t('invalidAmount'));
+                return;
+            }
+            const changes = {};
+            if (amount !== tx.amount) changes.amount = amount;
+            if ($('editCurrency').value !== tx.currency) changes.currency = $('editCurrency').value;
+            if ($('editType').dataset.value !== tx.type) changes.type = $('editType').dataset.value;
+            if ($('editCategory').value !== tx.category) changes.category = $('editCategory').value;
+            if ($('editDate').value && $('editDate').value !== tx.date) changes.date = $('editDate').value;
+            if ($('editDescription').value.trim() !== (tx.description || '')) changes.description = $('editDescription').value.trim();
+            if ($('editStore').value.trim() !== (tx.store || '')) changes.store = $('editStore').value.trim();
+            if (!Object.keys(changes).length) {
+                closeSheet();
+                return;
+            }
+            setSheetBusy(true);
+            try {
+                const res = await api({ action: 'update', id: tx.id, changes });
+                const index = data.items.findIndex(x => x.id === tx.id);
+                if (index >= 0) data.items[index] = res.item;
+                haptic('success');
+                closeSheet();
+                afterChange();
+            } catch (err) {
+                haptic('error');
+                showSheetError(t('saveError', { error: err.message }));
+                setSheetBusy(false);
+            }
+        }
+
+        async function deleteEditing() {
+            if (!editing) return;
+            const tx = editing;
+            setSheetBusy(true);
+            try {
+                await api({ action: 'delete', id: tx.id });
+                data.items = data.items.filter(x => x.id !== tx.id);
+                haptic('success');
+                closeSheet();
+                if (!data.items.length) showView('empty');
+                else afterChange();
+            } catch (err) {
+                haptic('error');
+                showSheetError(t('deleteError', { error: err.message }));
+                setSheetBusy(false);
+            }
+        }
+
+        function confirmDelete() {
+            const proceed = (ok) => { if (ok) deleteEditing(); };
+            try {
+                if (tg && tg.showConfirm && tg.isVersionAtLeast && tg.isVersionAtLeast('6.2')) {
+                    tg.showConfirm(t('deleteConfirm'), proceed);
+                    return;
+                }
+            } catch (e) { /* fall back to the browser dialog */ }
+            proceed(window.confirm(t('deleteConfirm')));
+        }
+
+        // ---------- language & theme ----------
+        function applyLanguage() {
+            const dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = state.lang;
+            document.documentElement.dir = dir;
+            document.body.dir = dir;
+            document.title = t('title');
+            const texts = {
+                title: 'title', subtitle: 'subtitle', loadingText: 'loading', emptyText: 'emptyText', emptyHint: 'emptyHint',
+                errorText: 'errorText', retryButton: 'retry', langButton: 'langButton', 'label-month': 'labelMonth',
+                'label-category': 'labelCategory', 'label-currency': 'labelCurrency', comparisonTitle: 'comparisonTitle',
+                incomeLabel: 'incomeLabel', expenseLabel: 'expenseLabel', balanceText: 'balanceText',
+                categoryTitle: 'categoryChartTitle', transactionsTitle: 'transactionsTitle', editHint: 'editHint',
+                closeText: 'closeText', sheetTitle: 'editTitle', lblAmount: 'amount', lblCurrency: 'currency', lblType: 'type',
+                lblCategory: 'category', lblDate: 'date', lblDescription: 'description', lblStore: 'store',
+                saveButton: 'save', cancelButton: 'cancel', deleteButton: 'delete'
+            };
+            Object.entries(texts).forEach(([id, key]) => { $(id).textContent = t(key); });
+            $('searchInput').placeholder = t('searchPlaceholder');
+            $('refreshButton').setAttribute('aria-label', t('refresh'));
+            document.querySelectorAll('#editType button').forEach(b => { b.textContent = I18N[state.lang].types[b.dataset.type]; });
+        }
+
+        function applyChartTheme() {
+            if (!window.Chart) return;
+            Chart.defaults.color = cssVar('--tg-theme-hint-color', '#64748b');
+            Chart.defaults.borderColor = 'rgba(128, 128, 128, 0.15)';
+            Chart.defaults.font.family = getComputedStyle(document.body).fontFamily;
+        }
+
+        // ---------- events ----------
+        $('monthFilter').addEventListener('change', e => { state.month = e.target.value; state.listLimit = PAGE_SIZE; haptic('select'); render(); });
+        $('categoryFilter').addEventListener('change', e => { state.category = e.target.value; state.listLimit = PAGE_SIZE; haptic('select'); render(); });
+        $('currencyFilter').addEventListener('change', e => {
+            state.currencyChoice = e.target.value;
+            prefs.set('currency', state.currencyChoice);
+            state.listLimit = PAGE_SIZE;
+            haptic('select');
+            render();
+        });
+        $('searchInput').addEventListener('input', e => { state.search = e.target.value; state.listLimit = PAGE_SIZE; renderList(); });
+        $('moreButton').addEventListener('click', () => { state.listLimit += PAGE_SIZE; renderList(); });
+        $('transactionList').addEventListener('click', e => {
+            const item = e.target.closest('.transaction-item');
+            if (!item) return;
+            const tx = data.items.find(x => x.id === Number(item.dataset.id));
+            if (tx) openSheet(tx);
+        });
+        $('categoryList').addEventListener('click', e => {
+            const item = e.target.closest('.category-item');
+            if (item) selectCategory(item.dataset.category);
+        });
+        document.querySelectorAll('#editType button').forEach(b => b.addEventListener('click', () => setType(b.dataset.type)));
+        $('saveButton').addEventListener('click', saveEdit);
+        $('deleteButton').addEventListener('click', confirmDelete);
+        $('cancelButton').addEventListener('click', closeSheet);
+        $('sheetBackdrop').addEventListener('click', e => { if (e.target === $('sheetBackdrop')) closeSheet(); });
+        $('refreshButton').addEventListener('click', () => load(data.items.length > 0));
+        $('retryButton').addEventListener('click', () => load(false));
+        $('closeButton').addEventListener('click', () => { if (tg) tg.close(); });
+        $('langButton').addEventListener('click', () => {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            prefs.set('lang', state.lang);
+            applyLanguage();
+            if (data.items.length) {
+                populateFilters();
+                render();
+            }
+        });
+
+        // New entries sent to the bot show up when you come back to the dashboard.
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && data.items.length && Date.now() - loadedAt > 60000) load(true);
+        });
+        if (tg && tg.onEvent) {
+            tg.onEvent('activated', () => { if (data.items.length && Date.now() - loadedAt > 60000) load(true); });
+            tg.onEvent('themeChanged', () => { applyChartTheme(); if (data.items.length) render(); });
+        }
+
+        // ---------- start ----------
+        $('userInfo').textContent = `👤 ${(tgUser && (tgUser.username || tgUser.first_name)) || '—'}`;
+        applyLanguage();
+        applyChartTheme();
+        load(false);
     </script>
 </body>
 </html>
