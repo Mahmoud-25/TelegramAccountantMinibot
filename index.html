@@ -6,7 +6,7 @@
     <title>المحاسب الذكي</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link rel="stylesheet" href="assets/app.css?v=3">
+    <link rel="stylesheet" href="assets/app.css?v=4">
 </head>
 <body dir="rtl">
     <header class="topbar">
@@ -31,20 +31,23 @@
 
         <!-- Tasks -->
         <section class="view hidden" data-view="tasks">
-            <div class="view-head"><div><h1 data-i18n="tabTasks"></h1><p class="sub" id="tasksSub"></p></div></div>
+            <div class="view-head"><h1 data-i18n="tabTasks"></h1></div>
             <div class="view-error hidden" id="tasksError"></div>
             <div id="tasksContent">
-                <div class="card hero">
-                    <div class="ring-wrap">
-                        <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
-                            <circle class="ring-bg" cx="18" cy="18" r="15.9"></circle>
-                            <circle class="ring-fg" id="ringFg" cx="18" cy="18" r="15.9" stroke-dasharray="0 100"></circle>
-                        </svg>
-                        <div class="ring-label" id="ringLabel">—</div>
-                    </div>
-                    <div>
-                        <div class="hero-title" id="heroTitle"></div>
-                        <div class="hint" id="heroSub"></div>
+                <div class="hero tasks">
+                    <div class="hero-row">
+                        <div class="ring-wrap">
+                            <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
+                                <circle class="ring-bg" cx="18" cy="18" r="15.9"></circle>
+                                <circle class="ring-fg" id="ringFg" cx="18" cy="18" r="15.9" stroke-dasharray="0 100"></circle>
+                            </svg>
+                            <div class="ring-label" id="ringLabel">—</div>
+                        </div>
+                        <div>
+                            <div class="hero-label" id="heroDate"></div>
+                            <div class="hero-title" id="heroTitle"></div>
+                            <div class="hero-sub" id="heroSub"></div>
+                        </div>
                     </div>
                 </div>
                 <form class="card add-card" id="addTodoForm">
@@ -68,72 +71,62 @@
         <!-- Habits -->
         <section class="view hidden" data-view="habits">
             <div class="view-head">
-                <div><h1 data-i18n="tabHabits"></h1><p class="sub" id="habitsSub"></p></div>
+                <h1 data-i18n="tabHabits"></h1>
                 <button class="head-btn" id="newHabitButton" type="button" aria-label="+">+</button>
             </div>
             <div class="view-error hidden" id="habitsError"></div>
-            <div id="habitList"></div>
-            <details class="fold hidden" id="habitsPausedBox"><summary id="habitsPausedSummary"></summary><div id="habitsPaused"></div></details>
+            <div id="habitsContent">
+                <div class="hero habits">
+                    <div class="hero-label" data-i18n="doneToday"></div>
+                    <div class="hero-amount" id="habitsHero"></div>
+                    <div class="hero-pills">
+                        <div class="hero-pill"><span data-i18n="bestStreak"></span><b id="bestStreak"></b></div>
+                        <div class="hero-pill"><span data-i18n="last7"></span><b id="habitsWeek"></b></div>
+                    </div>
+                </div>
+                <div id="habitList"></div>
+                <details class="fold hidden" id="habitsPausedBox"><summary id="habitsPausedSummary"></summary><div id="habitsPaused"></div></details>
+            </div>
         </section>
 
         <!-- Accounting -->
         <section class="view hidden" data-view="accounting">
-            <div class="view-head"><div><h1 data-i18n="tabAccounting"></h1><p class="sub" id="accSub"></p></div></div>
+            <div class="view-head"><h1 data-i18n="tabAccounting"></h1></div>
             <div class="view-error hidden" id="accError"></div>
-            <div class="state hidden" id="accEmpty"><div class="state-icon">📊</div><h2 data-i18n="emptyText"></h2><p data-i18n="emptyHint"></p></div>
+            <div class="state hidden" id="accEmpty"><div class="state-icon">💸</div><h2 data-i18n="emptyText"></h2><p data-i18n="emptyHint"></p></div>
             <div id="accContent" class="hidden">
-                <div class="filters">
-                    <label class="filter"><span data-i18n="labelMonth"></span><select id="monthFilter"></select></label>
-                    <label class="filter"><span data-i18n="labelCategory"></span><select id="categoryFilter"></select></label>
-                    <label class="filter"><span data-i18n="labelCurrency"></span><select id="currencyFilter"></select></label>
+                <div class="period-bar">
+                    <button class="nav-arrow" id="prevMonth" type="button" data-i18n-aria="prevMonth">‹</button>
+                    <select class="period-select" id="monthFilter" data-i18n-aria="month"></select>
+                    <button class="nav-arrow" id="nextMonth" type="button" data-i18n-aria="nextMonth">›</button>
+                    <select class="currency-pill" id="currencyFilter" data-i18n-aria="currency"></select>
                 </div>
+                <div class="filter-chip hidden" id="categoryChip"><span id="categoryChipLabel"></span><button type="button" id="clearCategory" aria-label="✕">✕</button></div>
 
-                <div class="kpi-grid">
-                    <div class="kpi"><div class="kpi-top"><span class="kpi-icon" id="kpiIcon0"></span><span class="kpi-label" id="kpiLabel0"></span></div><div class="kpi-value" id="kpiValue0"></div><div class="kpi-delta" id="kpiDelta0"></div></div>
-                    <div class="kpi"><div class="kpi-top"><span class="kpi-icon" id="kpiIcon1"></span><span class="kpi-label" id="kpiLabel1"></span></div><div class="kpi-value" id="kpiValue1"></div><div class="kpi-delta" id="kpiDelta1"></div></div>
-                    <div class="kpi"><div class="kpi-top"><span class="kpi-icon" id="kpiIcon2"></span><span class="kpi-label" id="kpiLabel2"></span></div><div class="kpi-value" id="kpiValue2"></div><div class="kpi-delta" id="kpiDelta2"></div></div>
-                    <div class="kpi"><div class="kpi-top"><span class="kpi-icon" id="kpiIcon3"></span><span class="kpi-label" id="kpiLabel3"></span></div><div class="kpi-value" id="kpiValue3"></div><div class="kpi-delta" id="kpiDelta3"></div></div>
-                </div>
-                <div class="fx-note hidden" id="fxNote"></div>
-
-                <div class="card" id="comparisonCard">
-                    <div class="card-title"><span>⚖️</span><span data-i18n="comparisonTitle"></span></div>
-                    <div class="bars">
-                        <div>
-                            <div class="bar-label"><span data-i18n="incomeLabel"></span><span class="bar-amount" id="incomeBarAmount"></span></div>
-                            <div class="bar-track"><div class="bar-fill income" id="incomeBar"></div></div>
-                        </div>
-                        <div>
-                            <div class="bar-label"><span data-i18n="expenseLabel"></span><span class="bar-amount" id="expenseBarAmount"></span></div>
-                            <div class="bar-track"><div class="bar-fill expense" id="expenseBar"></div></div>
-                        </div>
+                <div class="hero money">
+                    <div class="hero-label" id="heroMoneyLabel"></div>
+                    <div class="hero-amount" id="heroSpent"></div>
+                    <div class="hero-pills">
+                        <div class="hero-pill"><span id="heroPill1Label"></span><b id="heroPill1"></b></div>
+                        <div class="hero-pill"><span id="heroPill2Label"></span><b id="heroPill2"></b></div>
                     </div>
-                    <div class="balance" id="balance"><span data-i18n="balanceText"></span><span class="bar-amount" id="balanceValue"></span></div>
-                </div>
-
-                <div class="card" id="trendCard">
-                    <div class="card-title"><span>📈</span><span id="trendTitle"></span></div>
-                    <div class="chart-box short"><canvas id="trendChart"></canvas></div>
-                    <div class="stat-grid" id="trendStats" style="margin-top:12px"></div>
                 </div>
 
                 <div class="card" id="categoryCard">
-                    <div class="card-title"><span>🎯</span><span data-i18n="categoryChartTitle"></span></div>
-                    <div class="hint small" data-i18n="categoryHint" style="margin:-6px 0 8px"></div>
-                    <div class="chart-box"><canvas id="categoryChart"></canvas></div>
-                    <div class="category-list" id="categoryList"></div>
+                    <div class="card-title"><span data-i18n="byCategory"></span></div>
+                    <div id="categoryList"></div>
                 </div>
 
-                <div class="card" id="monthlyCard">
-                    <div class="card-title"><span>📊</span><span data-i18n="incomeVsExpensesTitle"></span></div>
-                    <div class="chart-box short"><canvas id="monthlyChart"></canvas></div>
+                <div class="card" id="trendCard">
+                    <div class="card-title"><span id="trendTitle"></span></div>
+                    <div class="chart-box"><canvas id="trendChart"></canvas></div>
+                    <div class="mini-stats" id="trendStats"></div>
                 </div>
 
                 <div class="card flush" id="tableSection">
                     <div class="pad">
-                        <div class="card-title"><span>🧾</span><span data-i18n="transactionsTitle"></span><span class="count-pill" id="filterStatus"></span></div>
+                        <div class="card-title"><span data-i18n="transactionsTitle"></span></div>
                         <input class="search" id="searchInput" type="search" autocomplete="off" data-i18n-placeholder="searchPlaceholder">
-                        <div class="hint small" data-i18n="editHint" style="margin-bottom:10px"></div>
                     </div>
                     <div id="transactionList"></div>
                     <button class="more-button hidden" id="moreButton" type="button"></button>
@@ -144,31 +137,43 @@
         <!-- Goals -->
         <section class="view hidden" data-view="goals">
             <div class="view-head">
-                <div><h1 data-i18n="tabGoals"></h1><p class="sub" id="goalsSub"></p></div>
+                <h1 data-i18n="tabGoals"></h1>
                 <button class="head-btn" id="newGoalButton" type="button" aria-label="+">+</button>
             </div>
             <div class="view-error hidden" id="goalsError"></div>
-            <div id="goalsActive"></div>
-            <details class="fold hidden" id="pausedBox"><summary id="pausedSummary"></summary><div id="goalsPaused"></div></details>
-            <details class="fold hidden" id="doneBox"><summary id="doneSummary"></summary><div id="goalsDone"></div></details>
+            <div id="goalsContent">
+                <div class="hero goals">
+                    <div class="hero-label" data-i18n="activeGoals"></div>
+                    <div class="hero-amount" id="goalsHero"></div>
+                    <div class="hero-pills">
+                        <div class="hero-pill"><span data-i18n="avgProgress"></span><b id="goalsAvg"></b></div>
+                        <div class="hero-pill"><span data-i18n="finishedGoals"></span><b id="goalsDoneCount"></b></div>
+                    </div>
+                </div>
+                <div id="goalsActive"></div>
+                <details class="fold hidden" id="pausedBox"><summary id="pausedSummary"></summary><div id="goalsPaused"></div></details>
+                <details class="fold hidden" id="doneBox"><summary id="doneSummary"></summary><div id="goalsDone"></div></details>
+            </div>
         </section>
 
         <!-- History -->
         <section class="view hidden" data-view="history">
-            <div class="view-head"><div><h1 data-i18n="tabHistory"></h1><p class="sub" data-i18n="historySub"></p></div></div>
+            <div class="view-head"><h1 data-i18n="tabHistory"></h1></div>
             <div class="view-error hidden" id="historyError"></div>
-            <div class="card">
-                <div class="card-title"><span>🗓️</span><span data-i18n="weekTitle"></span></div>
-                <div class="stat-grid three" id="weekStats"></div>
-            </div>
-            <div class="card">
-                <div class="card-title"><span>✅</span><span data-i18n="heatTitle"></span></div>
-                <div class="heatmap" id="heatmap"></div>
-                <div class="legend" id="legend"></div>
-            </div>
-            <div class="card">
-                <div class="card-title"><span>📊</span><span data-i18n="weeksTitle"></span></div>
-                <div id="weeks"></div>
+            <div id="historyContent">
+                <div class="hero history">
+                    <div class="hero-label" data-i18n="last7"></div>
+                    <div class="hero-pills" id="historyHero" style="margin-top:10px"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span data-i18n="heatTitle"></span></div>
+                    <div class="heatmap" id="heatmap"></div>
+                    <div class="legend" id="legend"></div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span data-i18n="weeksTitle"></span></div>
+                    <div id="weeks"></div>
+                </div>
             </div>
         </section>
     </main>
@@ -206,9 +211,9 @@
         </div>
     </div>
 
-    <script src="assets/core.js?v=3"></script>
-    <script src="assets/accounting.js?v=3"></script>
-    <script src="assets/tasks.js?v=3"></script>
+    <script src="assets/core.js?v=4"></script>
+    <script src="assets/accounting.js?v=4"></script>
+    <script src="assets/tasks.js?v=4"></script>
     <script>App.start();</script>
 </body>
 </html>

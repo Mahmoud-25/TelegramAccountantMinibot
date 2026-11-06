@@ -10,19 +10,16 @@
 
     App.addStrings({
         doneOf: 'أنجزت {done} من {total}', left: 'متبقي {n}', allDone: 'أنجزت كل شيء 🎉', allDoneShort: 'لا شيء متبقٍ 🎉',
-        noTodosTitle: 'يومك فارغ', noTodos: 'أضف مهمة بالأسفل، أو أرسل للبوت: task, ...', emptyList: 'لا توجد مهام بعد',
-        completed: 'المكتملة ({n})', tomorrowTitle: 'بكرة', carried: '↪️ ×{n}',
-        addPlaceholder: 'أضف مهمة...', dayToday: 'اليوم', dayTomorrow: 'بكرة',
-        habitsSub: 'أنجزت {done} من {total} اليوم', habitsSubEmpty: 'ابنِ عادات يومية وتابع سلاسلك',
-        habitsPaused: 'عادات متوقفة ({n})', noHabits: 'لا توجد عادات بعد. اضغط + لإضافة واحدة مثل: قراءة 20 صفحة يومياً.',
-        streak: '🔥 {n}', auto: 'تلقائي', perDay: '{n} يومياً',
-        goalsSub: '{active} نشطة · {done} مكتملة', paused: 'متوقفة ({n})', finished: 'مكتملة ({n})',
-        noGoals: 'لا توجد أهداف نشطة. اضغط + لبدء كتاب أو كورس أو مشروع.',
-        pace: 'بمعدل {rate} {unit} يومياً · تنتهي حوالي {date}', hours: '⏱️ {n} ساعة', cost: '💰 {amount}', logButton: '+ تقدم',
-        historySub: 'إنجازك على مدار الأسابيع', weekTitle: 'آخر 7 أيام', heatTitle: 'المهام المنجزة يومياً', weeksTitle: 'الأسابيع الأخيرة',
-        statTasks: 'مهام منجزة', statHabits: 'العادات', statHours: 'ساعات', statSpent: 'المصروفات', statEarned: 'الدخل', statProgress: '{unit}',
-        less: 'أقل', more: 'أكثر', weekLine: '{from} – {to}', todosDone: '✅ {done}/{total} مهام', hoursLine: '⏱️ {n} ساعة',
-        habitsLine: '🔁 العادات {pct}%', spentLine: '💸 {amount}', nothing: 'لا يوجد نشاط',
+        noTodosTitle: 'يومك فارغ', noTodos: 'أضف أول مهمة بالأسفل', emptyList: 'لا توجد مهام بعد',
+        completed: 'المكتملة ({n})', tomorrowTitle: 'بكرة', addPlaceholder: 'أضف مهمة...', dayToday: 'اليوم', dayTomorrow: 'بكرة',
+        doneToday: 'أنجزت اليوم', bestStreak: 'أطول سلسلة', last7: 'آخر 7 أيام', days: '{n} يوم',
+        habitsPaused: 'عادات متوقفة ({n})', noHabits: 'لا توجد عادات بعد. اضغط + لإضافة عادة مثل: قراءة 20 صفحة يومياً.',
+        perDay: '{n} يومياً',
+        activeGoals: 'أهداف نشطة', avgProgress: 'متوسط التقدم', finishedGoals: 'مكتملة',
+        paused: 'متوقفة ({n})', finished: 'مكتملة ({n})', noGoals: 'لا توجد أهداف نشطة. اضغط + لبدء كتاب أو كورس أو مشروع.',
+        finishBy: 'تنتهي حوالي {date}', logButton: '+ تقدم',
+        heatTitle: 'المهام المنجزة يومياً', weeksTitle: 'الأسابيع الأخيرة', tasksStat: 'المهام', habitsStat: 'العادات',
+        spentStat: 'المصروفات', less: 'أقل', more: 'أكثر', nothing: 'لا يوجد نشاط',
         editTodo: 'تعديل المهمة', taskTitle: 'المهمة', date: 'التاريخ',
         newGoalTitle: 'هدف جديد', kind: 'النوع', name: 'الاسم', total: 'الإجمالي (اختياري)', unit: 'الوحدة', create: 'إضافة',
         logTitle: 'سجّل تقدمك', amount: 'الكمية', modeAdd: 'أضف', modeSet: 'وصلت إلى', hoursField: 'ساعات (اختياري)', log: 'سجّل',
@@ -34,19 +31,16 @@
         units: { pages: 'صفحة', chapters: 'فصل', lessons: 'درس', hours: 'ساعة', steps: 'خطوة' }
     }, {
         doneOf: '{done} of {total} done', left: '{n} left', allDone: 'All done 🎉', allDoneShort: 'Nothing left 🎉',
-        noTodosTitle: 'Your day is clear', noTodos: 'Add a task below, or send the bot: task, ...', emptyList: 'No tasks yet',
-        completed: 'Completed ({n})', tomorrowTitle: 'Tomorrow', carried: '↪️ ×{n}',
-        addPlaceholder: 'Add a task...', dayToday: 'Today', dayTomorrow: 'Tomorrow',
-        habitsSub: '{done} of {total} done today', habitsSubEmpty: 'Build daily habits and keep your streaks',
+        noTodosTitle: 'Your day is clear', noTodos: 'Add your first task below', emptyList: 'No tasks yet',
+        completed: 'Completed ({n})', tomorrowTitle: 'Tomorrow', addPlaceholder: 'Add a task...', dayToday: 'Today', dayTomorrow: 'Tomorrow',
+        doneToday: 'Done today', bestStreak: 'Best streak', last7: 'Last 7 days', days: '{n} days',
         habitsPaused: 'Paused habits ({n})', noHabits: 'No habits yet. Tap + to add one, like reading 20 pages a day.',
-        streak: '🔥 {n}', auto: 'auto', perDay: '{n} a day',
-        goalsSub: '{active} active · {done} finished', paused: 'Paused ({n})', finished: 'Finished ({n})',
-        noGoals: 'No active goals. Tap + to start a book, a course or a project.',
-        pace: '{rate} {unit} a day · done around {date}', hours: '⏱️ {n} h', cost: '💰 {amount}', logButton: '+ Log',
-        historySub: 'Your progress over the weeks', weekTitle: 'Last 7 days', heatTitle: 'Tasks done per day', weeksTitle: 'Recent weeks',
-        statTasks: 'tasks done', statHabits: 'habits', statHours: 'hours', statSpent: 'spent', statEarned: 'earned', statProgress: '{unit}',
-        less: 'Less', more: 'More', weekLine: '{from} – {to}', todosDone: '✅ {done}/{total} tasks', hoursLine: '⏱️ {n} h',
-        habitsLine: '🔁 Habits {pct}%', spentLine: '💸 {amount}', nothing: 'No activity',
+        perDay: '{n} a day',
+        activeGoals: 'Active goals', avgProgress: 'Average progress', finishedGoals: 'Finished',
+        paused: 'Paused ({n})', finished: 'Finished ({n})', noGoals: 'No active goals. Tap + to start a book, a course or a project.',
+        finishBy: 'Done around {date}', logButton: '+ Log',
+        heatTitle: 'Tasks done per day', weeksTitle: 'Recent weeks', tasksStat: 'Tasks', habitsStat: 'Habits',
+        spentStat: 'Spent', less: 'Less', more: 'More', nothing: 'No activity',
         editTodo: 'Edit task', taskTitle: 'Task', date: 'Date',
         newGoalTitle: 'New goal', kind: 'Type', name: 'Name', total: 'Total (optional)', unit: 'Unit', create: 'Add',
         logTitle: 'Log progress', amount: 'Amount', modeAdd: 'Add', modeSet: 'Reached', hoursField: 'Hours (optional)', log: 'Log',
@@ -65,6 +59,15 @@
 
     const unitName = (u) => (u ? App.L().units[u] || u : '');
     const byId = (a, b) => a.id - b.id;
+
+    // "3 أيام" not "3 يوم": Arabic counts use different word forms.
+    function daysLabel(n) {
+        if (App.state.lang !== 'ar') return t('days', { n });
+        if (n === 1) return 'يوم واحد';
+        if (n === 2) return 'يومان';
+        if (n <= 10) return `${n} أيام`;
+        return `${n} يوماً`;
+    }
 
     // ---------- data ----------
     async function load() {
@@ -124,17 +127,23 @@
         while (n < 365 && habitDoneOn(habit, day).done) { n++; day = App.addDays(day, -1); }
         return n;
     }
+    function habitRate(habits, from, to) {
+        if (!habits.length) return null;
+        let done = 0;
+        let total = 0;
+        habits.forEach(h => { for (let d = from; d <= to; d = App.addDays(d, 1)) { total++; if (habitDoneOn(h, d).done) done++; } });
+        return Math.round((done / total) * 100);
+    }
 
     // Shows the error card for a tasks view; returns true if the view can render.
     function ready(view) {
         const box = $(view + 'Error');
         const ok = status === 'ready';
-        if (box) {
-            box.classList.toggle('hidden', ok || status === 'loading');
-            if (status === 'error') {
-                box.innerHTML = `<div class="card"><div class="state-icon">⚠️</div><div>${esc(t('loadError'))}</div><div class="hint">${esc(errorMessage)}</div><button class="btn primary" type="button" data-retry>${esc(t('retry'))}</button></div>`;
-            }
+        box.classList.toggle('hidden', ok || status === 'loading');
+        if (status === 'error') {
+            box.innerHTML = `<div class="card"><div class="state-icon">⚠️</div><div>${esc(t('loadError'))}</div><div class="hint">${esc(errorMessage)}</div><button class="btn primary" type="button" data-retry>${esc(t('retry'))}</button></div>`;
         }
+        $(view + 'Content').classList.toggle('hidden', !ok);
         return ok;
     }
 
@@ -144,14 +153,12 @@
         return `
             <div class="item${on ? ' done' : ''}">
                 <button class="check${on ? ' on' : ''}" type="button" data-toggle="${todo.id}" aria-label="done">${on ? '✓' : ''}</button>
-                <div class="item-title" data-edit-todo="${todo.id}">${esc(todo.title)}</div>
-                ${todo.status === 'open' && todo.carried > 0 ? `<span class="tag">${esc(t('carried', { n: todo.carried }))}</span>` : ''}
+                <div class="item-title" data-edit-todo="${todo.id}">${esc(todo.title)}${todo.status === 'open' && todo.carried > 0 ? ' <span class="carried">↪️</span>' : ''}</div>
             </div>`;
     }
 
     function renderTasks() {
-        $('tasksContent').classList.toggle('hidden', !ready('tasks'));
-        if (status !== 'ready') return;
+        if (!ready('tasks')) return;
         const today = data.today;
         const list = data.todos.filter(x => x.date === today).sort(byId);
         const open = list.filter(x => x.status !== 'done');
@@ -159,6 +166,7 @@
         const pct = list.length ? Math.round((done.length / list.length) * 100) : 0;
         $('ringFg').setAttribute('stroke-dasharray', `${pct} 100`);
         $('ringLabel').textContent = list.length ? `${pct}%` : '—';
+        $('heroDate').textContent = App.dayName(today);
         $('heroTitle').textContent = list.length ? t('doneOf', { done: done.length, total: list.length }) : t('noTodosTitle');
         $('heroSub').textContent = !list.length ? t('noTodos') : open.length ? t('left', { n: open.length }) : t('allDone');
         $('openList').innerHTML = open.length ? open.map(todoHtml).join('') : `<div class="empty">${esc(list.length ? t('allDoneShort') : t('emptyList'))}</div>`;
@@ -188,24 +196,30 @@
     }
 
     // ---------- Habits ----------
+    function weekStrip(habit) {
+        return Array.from({ length: 7 }, (_, i) => {
+            const day = App.addDays(data.today, i - 6);
+            const on = habitDoneOn(habit, day).done;
+            const letter = new Date(day + 'T12:00:00Z').toLocaleDateString(App.locale(), { weekday: 'narrow', timeZone: 'UTC' });
+            return `<div class="${day === data.today ? 'today' : ''}"><i class="${on ? 'on' : ''}">${on ? '✓' : ''}</i><span>${esc(letter)}</span></div>`;
+        }).join('');
+    }
+
     function habitHtml(habit) {
         const today = habitDoneOn(habit, data.today);
-        const days = Array.from({ length: 30 }, (_, i) => App.addDays(data.today, i - 29));
-        const grid = days.map(d => `<span class="${habitDoneOn(habit, d).done ? 'on' : ''}${d === data.today ? ' today' : ''}" title="${d}"></span>`).join('');
-        const target = habit.target ? t('perDay', { n: `${App.num(habit.target)} ${unitName(habit.unit)}` }) : '';
         const streak = streakOf(habit);
-        const sub = [target, today.auto ? t('auto') : ''].filter(Boolean).join(' · ');
+        const target = habit.target ? t('perDay', { n: `${App.num(habit.target)} ${unitName(habit.unit)}` }) : '';
         return `
-            <div class="card">
+            <div class="card habit">
                 <div class="habit-row">
                     <button class="check${today.done ? ' on' : ''}" type="button" data-habit-check="${habit.id}" ${today.auto || !habit.active ? 'disabled' : ''} aria-label="done today">${today.done ? '✓' : ''}</button>
                     <div class="habit-main" data-edit-habit="${habit.id}">
                         <div class="habit-title">${esc(habit.title)}</div>
-                        ${sub ? `<div class="hint">${esc(sub)}</div>` : ''}
+                        ${target ? `<div class="hint">${esc(target)}</div>` : ''}
                     </div>
-                    ${streak ? `<div class="streak">${esc(t('streak', { n: streak }))}</div>` : ''}
+                    ${streak ? `<div class="streak">🔥 ${streak}</div>` : ''}
                 </div>
-                ${habit.active ? `<div class="grid30">${grid}</div>` : ''}
+                ${habit.active ? `<div class="week-strip">${weekStrip(habit)}</div>` : ''}
             </div>`;
     }
 
@@ -214,7 +228,11 @@
         const active = data.habits.filter(h => h.active);
         const paused = data.habits.filter(h => !h.active);
         const doneToday = active.filter(h => habitDoneOn(h, data.today).done).length;
-        $('habitsSub').textContent = active.length ? t('habitsSub', { done: doneToday, total: active.length }) : t('habitsSubEmpty');
+        const best = active.reduce((max, h) => Math.max(max, streakOf(h)), 0);
+        const rate = habitRate(active, App.addDays(data.today, -6), data.today);
+        $('habitsHero').textContent = active.length ? `${doneToday}/${active.length}` : '—';
+        $('bestStreak').textContent = best ? `🔥 ${daysLabel(best)}` : '—';
+        $('habitsWeek').textContent = rate === null ? '—' : `${rate}%`;
         $('habitList').innerHTML = active.length ? active.map(habitHtml).join('') : `<div class="card empty">${esc(t('noHabits'))}</div>`;
         $('habitsPausedBox').classList.toggle('hidden', !paused.length);
         $('habitsPausedSummary').textContent = t('habitsPaused', { n: paused.length });
@@ -261,27 +279,27 @@
     // ---------- Goals ----------
     function goalHtml(goal) {
         const s = goal.stats || {};
-        const icons = App.L().icons;
+        const pct = Math.round(s.pct || 0);
         const progress = goal.total
             ? `${App.num(s.progress)}/${App.num(goal.total)} ${unitName(goal.unit)}`
             : `${App.num(s.progress)} ${unitName(goal.unit)}`;
-        const meta = [];
-        if (s.eta && goal.status === 'active') meta.push(t('pace', { rate: App.num(Math.round(s.perDay * 10) / 10), unit: unitName(goal.unit), date: App.shortDay(s.eta) }));
-        if (s.hours && goal.unit !== 'hours') meta.push(t('hours', { n: App.num(s.hours) }));
-        if (goal.cost) meta.push(t('cost', { amount: App.ltr(`${App.num(goal.cost.amount)} ${goal.cost.currency}`) }));
+        const finish = s.eta && goal.status === 'active' ? t('finishBy', { date: App.shortDay(s.eta) }) : '';
         return `
-            <div class="card goal" data-goal="${goal.id}">
+            <div class="card goal ${esc(goal.kind)}" data-goal="${goal.id}">
                 <div class="goal-head">
-                    <div class="goal-icon ${esc(goal.kind)}">${icons[goal.kind] || '🎯'}</div>
+                    <div class="goal-icon">${App.L().icons[goal.kind] || '🎯'}</div>
                     <div class="goal-name">
                         <div class="goal-title">${esc(goal.title)}</div>
                         <div class="goal-kind">${esc(App.L().kinds[goal.kind] || goal.kind)}</div>
                     </div>
+                    ${goal.total ? `<div class="goal-pct num">${pct}%</div>` : ''}
+                </div>
+                ${goal.total ? `<div class="bar"><div style="width:${Math.min(100, pct)}%"></div></div>` : ''}
+                <div class="goal-foot">
+                    <span class="num">${esc(progress)}</span>
                     ${goal.status === 'active' ? `<button class="log-btn" type="button" data-log-goal="${goal.id}">${esc(t('logButton'))}</button>` : ''}
                 </div>
-                <div class="progress-line"><span class="num">${esc(progress)}</span>${goal.total ? `<span class="pct">${Math.round(s.pct || 0)}%</span>` : ''}</div>
-                ${goal.total ? `<div class="bar"><div style="width:${Math.min(100, s.pct || 0)}%"></div></div>` : ''}
-                ${meta.length ? `<div class="goal-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
+                ${finish ? `<div class="hint" style="margin-top:6px">📅 ${esc(finish)}</div>` : ''}
             </div>`;
     }
 
@@ -290,7 +308,11 @@
         const active = data.goals.filter(g => g.status === 'active');
         const paused = data.goals.filter(g => g.status === 'paused');
         const done = data.goals.filter(g => g.status === 'done').sort((a, b) => String(b.finished_on).localeCompare(String(a.finished_on)));
-        $('goalsSub').textContent = t('goalsSub', { active: active.length, done: done.length });
+        const withTotal = active.filter(g => g.total);
+        const avg = withTotal.length ? Math.round(withTotal.reduce((s, g) => s + (g.stats.pct || 0), 0) / withTotal.length) : null;
+        $('goalsHero').textContent = String(active.length);
+        $('goalsAvg').textContent = avg === null ? '—' : `${avg}%`;
+        $('goalsDoneCount').textContent = String(done.length);
         $('goalsActive').innerHTML = active.length ? active.map(goalHtml).join('') : `<div class="card empty">${esc(t('noGoals'))}</div>`;
         $('pausedBox').classList.toggle('hidden', !paused.length);
         $('pausedSummary').textContent = t('paused', { n: paused.length });
@@ -334,7 +356,7 @@
         const progress = goal.total ? `${App.num(s.progress)}/${App.num(goal.total)} ${unitName(goal.unit)} · ${Math.round(s.pct || 0)}%` : `${App.num(s.progress)} ${unitName(goal.unit)}`;
         App.openSheet(`${App.L().icons[goal.kind]} ${goal.title}`, `
             <div class="hint num">${esc(progress)}</div>
-            ${goal.total ? `<div class="bar"><div style="width:${Math.min(100, s.pct || 0)}%"></div></div>` : ''}
+            ${goal.total ? `<div class="goal ${esc(goal.kind)}" style="margin-top:8px"><div class="bar"><div style="width:${Math.min(100, s.pct || 0)}%"></div></div></div>` : ''}
             <div class="divider"></div>
             <h4>${esc(t('logTitle'))}</h4>
             ${App.segmented('mode', [['add', t('modeAdd')], ['set', t('modeSet')]], 'add')}
@@ -374,35 +396,24 @@
     // ---------- History ----------
     function weekSummary(from, to) {
         const todos = data.todos.filter(x => x.date >= from && x.date <= to);
-        const done = todos.filter(x => x.status === 'done').length;
-        const logs = data.logs.filter(l => l.date >= from && l.date <= to);
-        const perUnit = {};
-        logs.forEach(l => {
-            const goal = data.goals.find(g => g.id === l.goal_id);
-            if (goal && goal.unit !== 'hours' && l.amount > 0) perUnit[goal.unit] = (perUnit[goal.unit] || 0) + Number(l.amount);
-        });
-        const hours = logs.reduce((s, l) => s + Number(l.hours), 0);
-        const habits = data.habits.filter(h => h.active);
-        let habitDays = 0;
-        habits.forEach(h => { for (let d = from; d <= to; d = App.addDays(d, 1)) if (habitDoneOn(h, d).done) habitDays++; });
-        const days = Math.round((Date.parse(to) - Date.parse(from)) / 86400000) + 1;
-        const habitPct = habits.length ? Math.round((habitDays / (habits.length * days)) * 100) : null;
-        const money = App.accounting ? App.accounting.totalsBetween(from, to) : null;
-        return { todos: todos.length, done, perUnit, hours, habitPct, money };
+        return {
+            todos: todos.length,
+            done: todos.filter(x => x.status === 'done').length,
+            habitPct: habitRate(data.habits.filter(h => h.active), from, to),
+            money: App.accounting ? App.accounting.totalsBetween(from, to) : null
+        };
     }
 
     function renderHistory() {
         if (!ready('history')) return;
         const today = data.today;
         const week = weekSummary(App.addDays(today, -6), today);
-        const stats = [
-            [`${week.done}/${week.todos}`, t('statTasks')],
-            [week.habitPct === null ? '—' : `${week.habitPct}%`, t('statHabits')],
-            ...Object.entries(week.perUnit).sort((a, b) => b[1] - a[1]).slice(0, 1).map(([u, v]) => [`+${App.num(v)}`, unitName(u)]),
-            [App.num(week.hours), t('statHours')],
-            ...(week.money ? [[App.fmtMoney(week.money.spent, week.money.cur), t('statSpent')], [App.fmtMoney(week.money.earned, week.money.cur), t('statEarned')]] : [])
-        ].slice(0, 6);
-        $('weekStats').innerHTML = stats.map(([value, label]) => `<div class="stat"><div class="stat-value">${esc(value)}</div><div class="stat-label">${esc(label)}</div></div>`).join('');
+        const pills = [
+            [t('tasksStat'), `${week.done}/${week.todos}`],
+            [t('habitsStat'), week.habitPct === null ? '—' : `${week.habitPct}%`],
+            ...(week.money ? [[t('spentStat'), App.fmtMoney(week.money.spent, week.money.cur)]] : [])
+        ];
+        $('historyHero').innerHTML = pills.map(([label, value]) => `<div class="hero-pill"><span>${esc(label)}</span><b>${esc(value)}</b></div>`).join('');
 
         // Heatmap: 12 weeks, Saturday to Friday columns.
         const doneByDay = {};
@@ -424,13 +435,11 @@
             const to = App.addDays(today, -7 * w);
             const from = App.addDays(to, -6);
             const s = weekSummary(from, to);
-            const parts = [];
-            if (s.todos) parts.push(t('todosDone', { done: s.done, total: s.todos }));
-            Object.entries(s.perUnit).forEach(([u, v]) => parts.push(`+${App.num(v)} ${unitName(u)}`));
-            if (s.hours) parts.push(t('hoursLine', { n: App.num(s.hours) }));
-            if (s.habitPct !== null) parts.push(t('habitsLine', { pct: s.habitPct }));
-            if (s.money && s.money.spent) parts.push(t('spentLine', { amount: App.ltr(App.fmtMoney(s.money.spent, s.money.cur)) }));
-            rows.push(`<div class="week-row"><b>${esc(t('weekLine', { from: App.shortDay(from), to: App.shortDay(to) }))}</b><div>${esc(parts.join(' · ') || t('nothing'))}</div></div>`);
+            const chips = [];
+            if (s.todos) chips.push(`<span class="mini-chip tasks">✅ <span class="num">${s.done}/${s.todos}</span></span>`);
+            if (s.habitPct !== null) chips.push(`<span class="mini-chip habits">🔥 <span class="num">${s.habitPct}%</span></span>`);
+            if (s.money && s.money.spent) chips.push(`<span class="mini-chip money">💸 <span class="num">${esc(App.fmtMoney(s.money.spent, s.money.cur))}</span></span>`);
+            rows.push(`<div class="week-row"><b>${esc(App.shortDay(from))} – ${esc(App.shortDay(to))}</b><div class="chip-row">${chips.join('') || `<span class="hint">${esc(t('nothing'))}</span>`}</div></div>`);
         }
         $('weeks').innerHTML = rows.join('');
     }
@@ -493,16 +502,16 @@
     }
 
     App.addLoader(load);
-    const badgeTasks = () => {
+    const badges = () => {
         if (status !== 'ready') return;
         App.setBadge('tasks', data.todos.filter(x => x.date === data.today && x.status === 'open').length);
         App.setBadge('habits', data.habits.filter(h => h.active && !habitDoneOn(h, data.today).done).length);
     };
-    App.register('tasks', { render: renderTasks, badge: badgeTasks, hasData: () => status === 'ready' && (data.todos.length + data.goals.length + data.habits.length) > 0 });
+    App.register('tasks', { render: renderTasks, badge: badges, hasData: () => status === 'ready' && (data.todos.length + data.goals.length + data.habits.length) > 0 });
     App.register('habits', { render: renderHabits });
     App.register('goals', { render: renderGoals });
     App.register('history', { render: renderHistory });
 
-    document.addEventListener('DOMContentLoaded', bind);
-    if (document.readyState !== 'loading') bind();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bind);
+    else bind();
 })(window.App);
