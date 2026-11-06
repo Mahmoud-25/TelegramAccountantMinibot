@@ -34,6 +34,32 @@
             margin: 0 auto;
         }
 
+        /* Switch between the Accounting and Tasks apps */
+        .app-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            padding: 4px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+        }
+
+        .app-switch a, .app-switch span {
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--tg-theme-hint-color, #64748b);
+        }
+
+        .app-switch .active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
         /* Header */
         .header { margin-bottom: 16px; }
 
@@ -747,6 +773,11 @@
 </head>
 <body dir="rtl">
     <div class="container">
+        <nav class="app-switch">
+            <span class="active" id="accountingTabLabel">💰 الحسابات</span>
+            <a href="tasks.html" id="toTasks">📋 المهام</a>
+        </nav>
+
         <div class="header">
             <div class="header-top">
                 <h1 id="title">💰 لوحة المصروفات</h1>
@@ -941,9 +972,18 @@
             tg.expand();
         }
 
+        // Keep Telegram's login data when switching between the Accounting and Tasks apps.
+        let initData = (tg && tg.initData) || '';
+        try {
+            if (initData) sessionStorage.setItem('tg.initData', initData);
+            else initData = sessionStorage.getItem('tg.initData') || '';
+        } catch (e) { /* storage unavailable */ }
+
         const I18N = {
             ar: {
                 title: '💰 لوحة المصروفات',
+                appAccounting: '💰 الحسابات',
+                appTasks: '📋 المهام',
                 subtitle: 'تحليلات إنفاقك الشخصية',
                 loading: 'جاري تحميل مصروفاتك بشكل آمن...',
                 emptyText: 'لا توجد مصروفات بعد',
@@ -1018,6 +1058,8 @@
             },
             en: {
                 title: '💰 Expense Dashboard',
+                appAccounting: '💰 Accounting',
+                appTasks: '📋 Tasks',
                 subtitle: 'Your personal spending analytics',
                 loading: 'Securely loading your expenses...',
                 emptyText: 'No expenses yet',
@@ -1125,7 +1167,7 @@
         const $ = (id) => document.getElementById(id);
         const esc = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
         // Keep numbers like "17,311 EGP" or "1 USD = 55.37 EGP" in order inside Arabic sentences.
-        const ltr = (text) => '⁦' + text + '⁩';
+        const ltr = (text) => '\u2066' + text + '\u2069';
         const pad = (n) => String(n).padStart(2, '0');
         const locale = () => (state.lang === 'ar' ? 'ar-EG' : 'en-US');
 
@@ -1247,7 +1289,7 @@
             const res = await fetch(API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ initData: tg ? tg.initData : '', ...body })
+                body: JSON.stringify({ initData, ...body })
             });
             let json = null;
             try { json = await res.json(); } catch (e) { /* not JSON */ }
@@ -1801,6 +1843,7 @@
             document.body.dir = dir;
             document.title = t('title');
             const texts = {
+                accountingTabLabel: 'appAccounting', toTasks: 'appTasks',
                 title: 'title', subtitle: 'subtitle', loadingText: 'loading', emptyText: 'emptyText', emptyHint: 'emptyHint',
                 errorText: 'errorText', retryButton: 'retry', langButton: 'langButton', 'label-month': 'labelMonth',
                 'label-category': 'labelCategory', 'label-currency': 'labelCurrency', comparisonTitle: 'comparisonTitle',

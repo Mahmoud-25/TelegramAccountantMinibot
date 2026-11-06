@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>📋 المهام</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Cairo', sans-serif;
+            background-color: var(--tg-theme-bg-color, #f8fafc);
+            color: var(--tg-theme-text-color, #1e293b);
+            padding: 12px;
+            min-height: 100vh;
+            padding-bottom: 40px;
+        }
+        body[dir="ltr"] { text-align: left; }
+        body[dir="rtl"] { text-align: right; }
+        .hidden { display: none !important; }
+        .container { max-width: 760px; margin: 0 auto; }
+
+        /* App switch (shared with the accounting page) */
+        .app-switch {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            padding: 4px;
+            margin-bottom: 14px;
+            border-radius: 10px;
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+        }
+        .app-switch a, .app-switch span {
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            text-decoration: none;
+            color: var(--tg-theme-hint-color, #64748b);
+        }
+        .app-switch .active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+
+        /* Header */
+        .header { margin-bottom: 12px; }
+        .header-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+        h1 { font-size: 22px; font-weight: 700; }
+        .header-actions { display: flex; gap: 6px; flex-shrink: 0; }
+        .lang-switch, .icon-button, .retry-button {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .icon-button { padding: 6px 10px; font-size: 14px; line-height: 1; }
+        .icon-button.spinning span { display: inline-block; animation: spin 0.8s linear infinite; }
+        .retry-button { padding: 10px 20px; font-size: 14px; }
+        .user-info {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #64748b);
+            margin-top: 6px;
+            padding: 6px 10px;
+            background: var(--tg-theme-secondary-bg-color, #f1f5f9);
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .tabs button {
+            padding: 9px 4px;
+            border-radius: 10px;
+            border: 1px solid var(--tg-theme-hint-color, #cbd5e1);
+            background: transparent;
+            color: var(--tg-theme-text-color, #1e293b);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .tabs button.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #3390ec);
+        }
+
+        /* States */
+        .loading-container, .error-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            text-align: center;
+            padding: 30px 20px;
+            gap: 16px;
+        }
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--tg-theme-hint-color, #e0e0e0);
+            border-top-color: var(--tg-theme-button-color, #3390ec);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .error-icon { font-size: 48px; opacity: 0.5; }
+
+        /* Cards */
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #ffffff);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+        }
+        .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+        .hint { font-size: 12px; color: var(--tg-theme-hint-color, #64748b); }
+        .empty { padding: 14px 0; text-align: center; font-size: 13px; color: var(--tg-theme-hint-color, #64748b); }
+
+        /* Today */
+        .today-card { display: flex; align-items: center; gap: 14px; }
+        .ring { width: 72px; height: 72px; flex-shrink: 0; transform: rotate(-90deg); }
+        .ring circle { fill: none; stroke-width: 3.2; }
+        .ring .ring-bg { stroke: rgba(127, 127, 127, 0.2); }
+        .ring .ring-fg { stroke: #10b981; stroke-linecap: round; transition: stroke-dasharray 0.4s ease; }
+        .ring-wrap { position: relative; }
+        .ring-label {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            direction: ltr;
+        }
+        .today-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+
+        .item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(127, 127, 127, 0.15);
+        }
+        .item:last-child { border-bottom: none; }
+        .check {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            border: 2px solid var(--tg-theme-hint-color, #94a3b8);
+            background: transparent;
+            color: #ffffff;
+            font-size: 14px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .check.on { background: #10b981; border-color: #10b981; }
+        .item-title { flex: 1; font-size: 14px; cursor: pointer; word-break: break-word; }
+        .item.done .item-title { text-decoration: line-through; color: var(--tg-theme-hint-color, #94a3b8); }
+        .badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 6px;
+            background: #fef3c7;
+            color: #92400e;
+            white-space: nowrap;
+        }
+        .add-row { display: flex; gap: 6px; margin-top: 10px; }
+        .add-row input { flex: 1; min-width: 0; }
+        .add-row select { width: auto; }
+
+        input, select, textarea {
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #1e293b);
+            border: 1px solid var(--tg-theme-hint-color, #e2e8f0);
+            border-radius: 8px;
+            padding: 10px 12px;
+            font-size: 14px;
+            width: 100%;
+            font-family: inherit;
+        }
+        .btn {
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: none;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn.primary { background: var(--tg-theme-button-color, #3390ec); color: var(--tg-theme-button-text-color, #ffffff); }
+        .btn.secondary { background: var(--tg-theme-bg-color, #f1f5f9); color: var(--tg-theme-text-color, #1e293b); border: 1px solid rgba(127, 127, 127, 0.25); }
+        .btn.danger { background: #fee2e2; color: #b91c1c; }
+        .btn:disabled { opacity: 0.5; }
+        .add-button {
+            width: 100%;
+            margin-bottom: 12px;
+            padding: 11px;
+            border-radius: 10px;
+            border: 1px dashed var(--tg-theme-hint-color, #cbd5e1);
+            background: transparent;
+            color: var(--tg-theme-link-color, #3390ec);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* Goals */
+        .goal { cursor: pointer; }
+        .goal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+        .goal-title { font-size: 15px; font-weight: 700; }
+        .goal-kind { font-size: 11px; color: var(--tg-theme-hint-color, #64748b); }
+        .bar { height: 10px; border-radius: 6px; background: rgba(127, 127, 127, 0.18); overflow: hidden; margin: 6px 0; }
+        .bar > div { height: 100%; background: linear-gradient(90deg, #3b82f6, #10b981); border-radius: 6px; }
+        body[dir="rtl"] .bar > div { margin-right: 0; margin-left: auto; }
+        .goal-meta { display: flex; flex-wrap: wrap; gap: 6px 12px; font-size: 12px; color: var(--tg-theme-hint-color, #64748b); }
+        .num { direction: ltr; unicode-bidi: isolate; }
+        details { margin-bottom: 12px; }
+        summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--tg-theme-hint-color, #64748b); padding: 6px 2px; }
+
+        /* Habits */
+        .habit-row { display: flex; align-items: center; gap: 10px; }
+        .habit-main { flex: 1; min-width: 0; cursor: pointer; }
+        .habit-title { font-size: 15px; font-weight: 700; }
+        .streak { font-size: 13px; font-weight: 700; white-space: nowrap; }
+        .grid30 { display: grid; grid-template-columns: repeat(30, 1fr); gap: 2px; margin-top: 10px; direction: ltr; }
+        .grid30 span { aspect-ratio: 1; border-radius: 2px; background: rgba(127, 127, 127, 0.18); }
+        .grid30 span.on { background: #10b981; }
+        .grid30 span.today { outline: 1px solid var(--tg-theme-hint-color, #64748b); }
+
+        /* History */
+        .heatmap { display: grid; grid-template-rows: repeat(7, 1fr); grid-auto-flow: column; gap: 3px; direction: ltr; }
+        .heatmap span { aspect-ratio: 1; border-radius: 3px; background: rgba(127, 127, 127, 0.15); }
+        .heatmap span.l1 { background: #bbf7d0; }
+        .heatmap span.l2 { background: #4ade80; }
+        .heatmap span.l3 { background: #16a34a; }
+        .heatmap span.l4 { background: #166534; }
+        .heatmap span.future { visibility: hidden; }
+        .legend { display: flex; align-items: center; gap: 4px; justify-content: flex-end; margin-top: 8px; font-size: 11px; color: var(--tg-theme-hint-color, #64748b); direction: ltr; }
+        .legend span { width: 11px; height: 11px; border-radius: 2px; display: inline-block; }
+        .week-row { padding: 10px 0; border-bottom: 1px solid rgba(127, 127, 127, 0.15); font-size: 13px; }
+        .week-row:last-child { border-bottom: none; }
+        .week-row b { display: block; margin-bottom: 4px; }
+
+        /* Sheet */
+        .sheet-backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.45);
+            z-index: 1000;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+        }
+        .sheet {
+            background: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #1e293b);
+            width: 100%;
+            max-width: 560px;
+            max-height: 92vh;
+            overflow-y: auto;
+            border-radius: 16px 16px 0 0;
+            padding: 12px 16px 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .sheet-handle { width: 40px; height: 4px; border-radius: 2px; background: var(--tg-theme-hint-color, #94a3b8); opacity: 0.4; margin: 0 auto 10px; }
+        .sheet h3 { font-size: 17px; margin-bottom: 10px; }
+        .field { margin-bottom: 10px; }
+        .field > label { display: block; font-size: 11px; font-weight: 700; color: var(--tg-theme-hint-color, #64748b); margin-bottom: 4px; }
+        .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .segmented { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+        .segmented button {
+            padding: 9px 6px;
+            border-radius: 8px;
+            border: 1px solid var(--tg-theme-hint-color, #cbd5e1);
+            background: transparent;
+            color: var(--tg-theme-text-color, #1e293b);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .segmented button.active {
+            background: var(--tg-theme-button-color, #3390ec);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border-color: var(--tg-theme-button-color, #3390ec);
+        }
+        .sheet-error { color: #ef4444; font-size: 12px; margin: 4px 0 8px; }
+        .sheet-actions { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 8px; margin-top: 12px; }
+        .divider { height: 1px; background: rgba(127, 127, 127, 0.2); margin: 14px 0; }
+        .log-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 7px 0; font-size: 13px; border-bottom: 1px solid rgba(127, 127, 127, 0.12); }
+        .log-row button { border: none; background: transparent; font-size: 15px; cursor: pointer; }
+    </style>
+</head>
+<body dir="rtl">
+    <div class="container">
+        <nav class="app-switch">
+            <a href="index.html" id="toAccounting">💰 الحسابات</a>
+            <span class="active" id="tasksTabLabel">📋 المهام</span>
+        </nav>
+
+        <div class="header">
+            <div class="header-top">
+                <h1 id="title">📋 المهام</h1>
+                <div class="header-actions">
+                    <button class="icon-button" id="refreshButton" type="button" aria-label="تحديث"><span>🔄</span></button>
+                    <button class="lang-switch" id="langButton" type="button">English</button>
+                </div>
+            </div>
+            <div class="user-info" id="userInfo">…</div>
+        </div>
+
+        <div class="tabs hidden" id="tabs">
+            <button type="button" data-tab="today"></button>
+            <button type="button" data-tab="goals"></button>
+            <button type="button" data-tab="habits"></button>
+            <button type="button" data-tab="history"></button>
+        </div>
+
+        <div class="loading-container" id="loadingState" style="display: flex;">
+            <div class="spinner"></div>
+            <div id="loadingText">…</div>
+        </div>
+        <div class="error-state" id="errorState">
+            <div class="error-icon">⚠️</div>
+            <div id="errorMessage"></div>
+            <button class="retry-button" id="retryButton" type="button"></button>
+        </div>
+
+        <div id="content" class="hidden">
+            <section id="tab-today">
+                <div class="card today-card">
+                    <div class="ring-wrap">
+                        <svg class="ring" viewBox="0 0 36 36" aria-hidden="true">
+                            <circle class="ring-bg" cx="18" cy="18" r="15.9"></circle>
+                            <circle class="ring-fg" id="ringFg" cx="18" cy="18" r="15.9" stroke-dasharray="0 100"></circle>
+                        </svg>
+                        <div class="ring-label" id="ringLabel">0/0</div>
+                    </div>
+                    <div>
+                        <div class="today-title" id="todayTitle"></div>
+                        <div class="hint" id="todaySub"></div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="todayList"></div>
+                    <form class="add-row" id="addTodoForm">
+                        <input id="newTodo" type="text" maxlength="300" autocomplete="off">
+                        <select id="newTodoDay"></select>
+                        <button class="btn primary" type="submit">+</button>
+                    </form>
+                </div>
+                <div class="card hidden" id="tomorrowCard">
+                    <h3 id="tomorrowTitle"></h3>
+                    <div id="tomorrowList"></div>
+                </div>
+            </section>
+
+            <section id="tab-goals" class="hidden">
+                <button class="add-button" id="newGoalButton" type="button"></button>
+                <div id="goalsActive"></div>
+                <details id="pausedBox"><summary id="pausedSummary"></summary><div id="goalsPaused"></div></details>
+                <details id="doneBox"><summary id="doneSummary"></summary><div id="goalsDone"></div></details>
+            </section>
+
+            <section id="tab-habits" class="hidden">
+                <button class="add-button" id="newHabitButton" type="button"></button>
+                <div id="habitList"></div>
+                <details id="habitsPausedBox"><summary id="habitsPausedSummary"></summary><div id="habitsPaused"></div></details>
+            </section>
+
+            <section id="tab-history" class="hidden">
+                <div class="card">
+                    <h3 id="heatTitle"></h3>
+                    <div class="heatmap" id="heatmap"></div>
+                    <div class="legend" id="legend"></div>
+                </div>
+                <div class="card">
+                    <h3 id="weeksTitle"></h3>
+                    <div id="weeks"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div class="sheet-backdrop hidden" id="sheetBackdrop">
+        <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+            <div class="sheet-handle"></div>
+            <h3 id="sheetTitle"></h3>
+            <div id="sheetBody"></div>
+            <div class="sheet-error hidden" id="sheetError"></div>
+            <div class="sheet-actions" id="sheetActions"></div>
+        </div>
+    </div>
+
+    <script>
+        // Data comes from a Supabase Edge Function that verifies Telegram's signed initData and
+        // only ever returns or changes the tasks of the person who opened the app.
+        const API_URL = 'https://ajdphdgkwycecmtlxqgv.supabase.co/functions/v1/tasks-api';
+
+        const tg = window.Telegram ? window.Telegram.WebApp : null;
+        if (tg) { tg.ready(); tg.expand(); }
+
+        // Keep Telegram's login data when switching between the two apps in the same window.
+        let initData = (tg && tg.initData) || '';
+        try {
+            if (initData) sessionStorage.setItem('tg.initData', initData);
+            else initData = sessionStorage.getItem('tg.initData') || '';
+        } catch (e) { /* storage unavailable */ }
+
+        const I18N = {
+            ar: {
+                title: '📋 المهام', accounting: '💰 الحسابات', tasks: '📋 المهام', langButton: 'English', refresh: 'تحديث',
+                loading: 'جاري تحميل مهامك...', retry: 'إعادة المحاولة', errorHint: 'تعذر التحميل',
+                tabToday: 'اليوم', tabGoals: 'الأهداف', tabHabits: 'العادات', tabHistory: 'السجل',
+                todayTitle: 'مهام اليوم', allDone: 'أنجزت كل شيء 🎉', left: 'متبقي {n}', noTodos: 'لا توجد مهام اليوم. أضف واحدة بالأسفل أو أرسل للبوت: today: ...',
+                carried: '↪️ ×{n}', addPlaceholder: 'مهمة جديدة...', dayToday: 'اليوم', dayTomorrow: 'بكرة', tomorrowTitle: '🗓️ بكرة',
+                newGoal: '+ هدف جديد', paused: '⏸️ متوقفة ({n})', done: '🏁 مكتملة ({n})', noGoals: 'لا توجد أهداف نشطة. ابدأ كتاباً أو كورساً أو مشروعاً.',
+                newHabit: '+ عادة جديدة', habitsPaused: '⏸️ عادات متوقفة ({n})', noHabits: 'لا توجد عادات. أضف واحدة مثل: قراءة 20 صفحة يومياً.',
+                streak: '🔥 {n}', auto: 'تلقائي', perDay: '{n} يومياً',
+                heatTitle: '✅ المهام المنجزة يومياً (آخر 12 أسبوع)', weeksTitle: '📊 آخر 4 أسابيع', less: 'أقل', more: 'أكثر',
+                weekLine: '{from} – {to}', todosDone: '✅ {done} من {total} مهام', hoursLine: '⏱️ {n} ساعة', habitsLine: '🔁 العادات {pct}%', nothing: 'لا يوجد نشاط',
+                pace: 'بمعدل {rate} {unit} يومياً · تنتهي حوالي {date}', hours: '⏱️ {n} ساعة', cost: '💰 {amount}', progressOf: '{p}/{t} {unit}',
+                editTodo: 'تعديل المهمة', taskTitle: 'المهمة', date: 'التاريخ', save: 'حفظ', cancel: 'إلغاء', delete: 'حذف',
+                newGoalTitle: 'هدف جديد', kind: 'النوع', name: 'الاسم', total: 'الإجمالي (اختياري)', unit: 'الوحدة', create: 'إضافة',
+                logTitle: 'تسجيل تقدم', amount: 'الكمية', modeAdd: 'أضف', modeSet: 'وصلت إلى', hoursField: 'ساعات (اختياري)', log: 'سجّل',
+                historyTitle: 'السجل', editGoal: 'تعديل', pause: 'إيقاف مؤقت', resume: 'استئناف', markDone: 'اكتمل', reopen: 'إعادة فتح',
+                newHabitTitle: 'عادة جديدة', target: 'الهدف اليومي (اختياري)', none: 'بدون', editHabit: 'تعديل العادة',
+                confirmDelete: 'حذف نهائياً؟', sessionExpired: 'انتهت الجلسة، أغلق التطبيق وافتحه مرة أخرى.', required: 'اكتب الاسم أولاً',
+                kinds: { book: 'كتاب', course: 'كورس', project: 'مشروع' },
+                icons: { book: '📚', course: '🎓', project: '🛠️' },
+                units: { pages: 'صفحة', chapters: 'فصل', lessons: 'درس', hours: 'ساعة', steps: 'خطوة' }
+            },
+            en: {
+                title: '📋 Tasks', accounting: '💰 Accounting', tasks: '📋 Tasks', langButton: 'العربية', refresh: 'Refresh',
+                loading: 'Loading your tasks...', retry: 'Try again', errorHint: 'Could not load',
+                tabToday: 'Today', tabGoals: 'Goals', tabHabits: 'Habits', tabHistory: 'History',
+                todayTitle: "Today's tasks", allDone: 'All done 🎉', left: '{n} left', noTodos: 'Nothing for today. Add one below or send the bot: today: ...',
+                carried: '↪️ ×{n}', addPlaceholder: 'New task...', dayToday: 'Today', dayTomorrow: 'Tomorrow', tomorrowTitle: '🗓️ Tomorrow',
+                newGoal: '+ New goal', paused: '⏸️ Paused ({n})', done: '🏁 Finished ({n})', noGoals: 'No active goals. Start a book, a course or a project.',
+                newHabit: '+ New habit', habitsPaused: '⏸️ Paused habits ({n})', noHabits: 'No habits yet. Add one, like reading 20 pages a day.',
+                streak: '🔥 {n}', auto: 'auto', perDay: '{n} a day',
+                heatTitle: '✅ Tasks done per day (last 12 weeks)', weeksTitle: '📊 Last 4 weeks', less: 'Less', more: 'More',
+                weekLine: '{from} – {to}', todosDone: '✅ {done} of {total} tasks', hoursLine: '⏱️ {n} h', habitsLine: '🔁 Habits {pct}%', nothing: 'No activity',
+                pace: '{rate} {unit} a day · done around {date}', hours: '⏱️ {n} h', cost: '💰 {amount}', progressOf: '{p}/{t} {unit}',
+                editTodo: 'Edit task', taskTitle: 'Task', date: 'Date', save: 'Save', cancel: 'Cancel', delete: 'Delete',
+                newGoalTitle: 'New goal', kind: 'Type', name: 'Name', total: 'Total (optional)', unit: 'Unit', create: 'Add',
+                logTitle: 'Log progress', amount: 'Amount', modeAdd: 'Add', modeSet: 'Reached', hoursField: 'Hours (optional)', log: 'Log',
+                historyTitle: 'History', editGoal: 'Edit', pause: 'Pause', resume: 'Resume', markDone: 'Finished', reopen: 'Reopen',
+                newHabitTitle: 'New habit', target: 'Daily target (optional)', none: 'None', editHabit: 'Edit habit',
+                confirmDelete: 'Delete for good?', sessionExpired: 'Your session expired. Close the app and open it again.', required: 'Enter a name first',
+                kinds: { book: 'Book', course: 'Course', project: 'Project' },
+                icons: { book: '📚', course: '🎓', project: '🛠️' },
+                units: { pages: 'pages', chapters: 'chapters', lessons: 'lessons', hours: 'hours', steps: 'steps' }
+            }
+        };
+        const UNITS = ['pages', 'chapters', 'lessons', 'hours', 'steps'];
+        const DEFAULT_UNIT = { book: 'pages', course: 'lessons', project: 'steps' };
+
+        const prefs = {
+            get(key) { try { return localStorage.getItem(key); } catch (e) { return null; } },
+            set(key, value) { try { localStorage.setItem(key, value); } catch (e) { /* storage unavailable */ } }
+        };
+        const tgUser = tg && tg.initDataUnsafe ? tg.initDataUnsafe.user : null;
+        const telegramLang = tgUser && tgUser.language_code ? (tgUser.language_code.startsWith('ar') ? 'ar' : 'en') : 'ar';
+        const state = { lang: prefs.get('dash.lang') || telegramLang, tab: prefs.get('tasks.tab') || 'today' };
+        let data = null;
+        let loading = false;
+        let loadedAt = 0;
+        let sheetClose = null;
+
+        // ---------- helpers ----------
+        const $ = (id) => document.getElementById(id);
+        const esc = (value) => String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+        const L = () => I18N[state.lang];
+        function t(key, vars) {
+            const text = L()[key] ?? I18N.en[key] ?? key;
+            return String(text).replace(/\{(\w+)\}/g, (_, k) => (vars && vars[k] !== undefined ? vars[k] : ''));
+        }
+        const num = (n) => Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 });
+        const locale = () => (state.lang === 'ar' ? 'ar-EG-u-nu-latn' : 'en-US');
+        const unitName = (u) => (u ? L().units[u] || u : '');
+        function addDays(iso, n) { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); }
+        function dayLabel(iso, opts) {
+            return new Date(iso + 'T12:00:00Z').toLocaleDateString(locale(), { ...(opts || { weekday: 'long', day: 'numeric', month: 'long' }), timeZone: 'UTC' });
+        }
+        const shortDay = (iso) => dayLabel(iso, { day: 'numeric', month: 'short' });
+        function haptic(kind) {
+            try {
+                if (!tg || !tg.HapticFeedback) return;
+                if (kind === 'select') tg.HapticFeedback.selectionChanged();
+                else tg.HapticFeedback.notificationOccurred(kind);
+            } catch (e) { /* not supported */ }
+        }
+        function confirmBox(message, proceed) {
+            try {
+                if (tg && tg.showConfirm && tg.isVersionAtLeast && tg.isVersionAtLeast('6.2')) { tg.showConfirm(message, proceed); return; }
+            } catch (e) { /* fall back */ }
+            proceed(window.confirm(message));
+        }
+
+        async function api(body) {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ initData, ...body })
+            });
+            let json = null;
+            try { json = await res.json(); } catch (e) { /* not JSON */ }
+            if (res.status === 401 && body.action !== 'list') throw new Error(t('sessionExpired'));
+            if (!res.ok || !json || json.error) throw new Error((json && json.error) || `HTTP ${res.status}`);
+            return json;
+        }
+
+        function showView(view) {
+            $('loadingState').style.display = view === 'loading' ? 'flex' : 'none';
+            $('errorState').style.display = view === 'error' ? 'flex' : 'none';
+            $('content').classList.toggle('hidden', view !== 'content');
+            $('tabs').classList.toggle('hidden', view !== 'content');
+        }
+
+        async function load(silent) {
+            if (loading) return;
+            loading = true;
+            $('refreshButton').classList.add('spinning');
+            if (!silent) showView('loading');
+            try {
+                data = await api({ action: 'list' });
+                loadedAt = Date.now();
+                showView('content');
+                render();
+            } catch (err) {
+                if (!silent || !data) {
+                    $('errorMessage').textContent = err.message || t('errorHint');
+                    showView('error');
+                }
+            } finally {
+                loading = false;
+                $('refreshButton').classList.remove('spinning');
+            }
+        }
+
+        // Run a change, then refresh from the server.
+        async function mutate(body, onError) {
+            try {
+                await api(body);
+                haptic('success');
+            } catch (err) {
+                haptic('error');
+                if (onError) onError(err);
+                else alertError(err);
+                return false;
+            }
+            await load(true);
+            return true;
+        }
+        function alertError(err) {
+            try { if (tg && tg.showAlert) { tg.showAlert(err.message); return; } } catch (e) { /* ignore */ }
+            window.alert(err.message);
+        }
+
+        // ---------- shared calculations ----------
+        function logsFor(goalId) { return data.logs.filter(l => l.goal_id === goalId); }
+        function habitDoneOn(habit, day) {
+            if (data.checks.some(c => c.habit_id === habit.id && c.date === day)) return { done: true, auto: false };
+            if (!habit.target || !habit.unit) return { done: false, auto: false };
+            const dayLogs = data.logs.filter(l => l.date === day);
+            let amount;
+            if (habit.unit === 'hours') amount = dayLogs.reduce((s, l) => s + Number(l.hours), 0);
+            else {
+                const ids = new Set(data.goals.filter(g => g.unit === habit.unit).map(g => g.id));
+                amount = dayLogs.filter(l => ids.has(l.goal_id)).reduce((s, l) => s + Number(l.amount), 0);
+            }
+            return { done: amount >= habit.target, auto: amount >= habit.target };
+        }
+        function streakOf(habit) {
+            let day = habitDoneOn(habit, data.today).done ? data.today : addDays(data.today, -1);
+            let n = 0;
+            while (n < 365 && habitDoneOn(habit, day).done) { n++; day = addDays(day, -1); }
+            return n;
+        }
+
+        // ---------- rendering ----------
+        function render() {
+            document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('active', b.dataset.tab === state.tab));
+            ['today', 'goals', 'habits', 'history'].forEach(tab => $('tab-' + tab).classList.toggle('hidden', tab !== state.tab));
+            if (state.tab === 'today') renderToday();
+            if (state.tab === 'goals') renderGoals();
+            if (state.tab === 'habits') renderHabits();
+            if (state.tab === 'history') renderHistory();
+        }
+
+        function todoHtml(todo) {
+            const on = todo.status === 'done';
+            return `
+                <div class="item${on ? ' done' : ''}">
+                    <button class="check${on ? ' on' : ''}" type="button" data-toggle="${todo.id}" aria-label="done">${on ? '✓' : ''}</button>
+                    <div class="item-title" data-edit-todo="${todo.id}">${esc(todo.title)}</div>
+                    ${todo.status === 'open' && todo.carried > 0 ? `<span class="badge">${esc(t('carried', { n: todo.carried }))}</span>` : ''}
+                </div>`;
+        }
+
+        function renderToday() {
+            const today = data.today;
+            const tomorrow = addDays(today, 1);
+            const list = data.todos.filter(x => x.date === today).sort((a, b) => a.id - b.id);
+            const done = list.filter(x => x.status === 'done').length;
+            const pct = list.length ? Math.round((done / list.length) * 100) : 0;
+            $('ringFg').setAttribute('stroke-dasharray', `${pct} 100`);
+            $('ringLabel').textContent = `${done}/${list.length}`;
+            $('todayTitle').textContent = `${t('todayTitle')} — ${dayLabel(today)}`;
+            $('todaySub').textContent = !list.length ? '' : done === list.length ? t('allDone') : t('left', { n: list.length - done });
+            $('todayList').innerHTML = list.length ? list.map(todoHtml).join('') : `<div class="empty">${esc(t('noTodos'))}</div>`;
+
+            const next = data.todos.filter(x => x.date === tomorrow).sort((a, b) => a.id - b.id);
+            $('tomorrowCard').classList.toggle('hidden', !next.length);
+            $('tomorrowTitle').textContent = t('tomorrowTitle');
+            $('tomorrowList').innerHTML = next.map(todoHtml).join('');
+        }
+
+        function goalHtml(goal) {
+            const s = goal.stats || {};
+            const icon = L().icons[goal.kind] || '🎯';
+            const progress = goal.total
+                ? t('progressOf', { p: num(s.progress), t: num(goal.total), unit: unitName(goal.unit) }) + ` (${Math.round(s.pct || 0)}%)`
+                : `${num(s.progress)} ${unitName(goal.unit)}`;
+            const meta = [];
+            if (s.eta && goal.status === 'active') meta.push(t('pace', { rate: num(Math.round(s.perDay * 10) / 10), unit: unitName(goal.unit), date: shortDay(s.eta) }));
+            if (s.hours && goal.unit !== 'hours') meta.push(t('hours', { n: num(s.hours) }));
+            // Keep "500 EGP" in order inside Arabic text.
+            if (goal.cost) meta.push(t('cost', { amount: `\u2066${num(goal.cost.amount)} ${goal.cost.currency}\u2069` }));
+            return `
+                <div class="card goal" data-goal="${goal.id}">
+                    <div class="goal-head">
+                        <div>
+                            <div class="goal-title">${icon} ${esc(goal.title)}</div>
+                            <div class="goal-kind">${esc(L().kinds[goal.kind] || goal.kind)}</div>
+                        </div>
+                        <button class="btn secondary" type="button" data-log-goal="${goal.id}">+</button>
+                    </div>
+                    <div class="num">${esc(progress)}</div>
+                    ${goal.total ? `<div class="bar"><div style="width:${Math.min(100, s.pct || 0)}%"></div></div>` : ''}
+                    ${meta.length ? `<div class="goal-meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</div>` : ''}
+                </div>`;
+        }
+
+        function renderGoals() {
+            $('newGoalButton').textContent = t('newGoal');
+            const active = data.goals.filter(g => g.status === 'active');
+            const paused = data.goals.filter(g => g.status === 'paused');
+            const done = data.goals.filter(g => g.status === 'done').sort((a, b) => String(b.finished_on).localeCompare(String(a.finished_on)));
+            $('goalsActive').innerHTML = active.length ? active.map(goalHtml).join('') : `<div class="card empty">${esc(t('noGoals'))}</div>`;
+            $('pausedBox').classList.toggle('hidden', !paused.length);
+            $('pausedSummary').textContent = t('paused', { n: paused.length });
+            $('goalsPaused').innerHTML = paused.map(goalHtml).join('');
+            $('doneBox').classList.toggle('hidden', !done.length);
+            $('doneSummary').textContent = t('done', { n: done.length });
+            $('goalsDone').innerHTML = done.map(goalHtml).join('');
+        }
+
+        function habitHtml(habit) {
+            const today = habitDoneOn(habit, data.today);
+            const days = Array.from({ length: 30 }, (_, i) => addDays(data.today, i - 29));
+            const grid = days.map(d => `<span class="${habitDoneOn(habit, d).done ? 'on' : ''}${d === data.today ? ' today' : ''}" title="${d}"></span>`).join('');
+            const target = habit.target ? t('perDay', { n: `${num(habit.target)} ${unitName(habit.unit)}` }) : '';
+            const streak = streakOf(habit);
+            return `
+                <div class="card">
+                    <div class="habit-row">
+                        <button class="check${today.done ? ' on' : ''}" type="button" data-habit-check="${habit.id}" ${today.auto ? 'disabled' : ''} aria-label="done today">${today.done ? '✓' : ''}</button>
+                        <div class="habit-main" data-edit-habit="${habit.id}">
+                            <div class="habit-title">${esc(habit.title)}</div>
+                            <div class="hint">${esc(target)}${today.auto ? ` · ${esc(t('auto'))}` : ''}</div>
+                        </div>
+                        <div class="streak">${streak ? esc(t('streak', { n: streak })) : ''}</div>
+                    </div>
+                    ${habit.active ? `<div class="grid30">${grid}</div>` : ''}
+                </div>`;
+        }
+
+        function renderHabits() {
+            $('newHabitButton').textContent = t('newHabit');
+            const active = data.habits.filter(h => h.active);
+            const paused = data.habits.filter(h => !h.active);
+            $('habitList').innerHTML = active.length ? active.map(habitHtml).join('') : `<div class="card empty">${esc(t('noHabits'))}</div>`;
+            $('habitsPausedBox').classList.toggle('hidden', !paused.length);
+            $('habitsPausedSummary').textContent = t('habitsPaused', { n: paused.length });
+            $('habitsPaused').innerHTML = paused.map(habitHtml).join('');
+        }
+
+        function renderHistory() {
+            $('heatTitle').textContent = t('heatTitle');
+            $('weeksTitle').textContent = t('weeksTitle');
+            const doneByDay = {};
+            data.todos.filter(x => x.status === 'done').forEach(x => { doneByDay[x.date] = (doneByDay[x.date] || 0) + 1; });
+            // 12 full weeks ending with the current week (Saturday to Friday).
+            const todayDow = new Date(data.today + 'T12:00:00Z').getUTCDay(); // 0 = Sunday
+            const sinceSaturday = (todayDow + 1) % 7;
+            const start = addDays(data.today, -sinceSaturday - 7 * 11);
+            const cells = [];
+            for (let i = 0; i < 84; i++) {
+                const day = addDays(start, i);
+                const n = doneByDay[day] || 0;
+                const level = n === 0 ? '' : n <= 2 ? 'l1' : n <= 4 ? 'l2' : n <= 6 ? 'l3' : 'l4';
+                cells.push(`<span class="${day > data.today ? 'future' : level}" title="${day}: ${n}"></span>`);
+            }
+            $('heatmap').innerHTML = cells.join('');
+            $('heatmap').style.gridTemplateColumns = 'repeat(12, 1fr)';
+            $('legend').innerHTML = `${esc(t('less'))} <span style="background:rgba(127,127,127,.15)"></span><span style="background:#bbf7d0"></span><span style="background:#4ade80"></span><span style="background:#16a34a"></span><span style="background:#166534"></span> ${esc(t('more'))}`;
+
+            const weeks = [];
+            for (let w = 0; w < 4; w++) {
+                const to = addDays(data.today, -7 * w);
+                const from = addDays(to, -6);
+                const todos = data.todos.filter(x => x.date >= from && x.date <= to);
+                const doneN = todos.filter(x => x.status === 'done').length;
+                const logs = data.logs.filter(l => l.date >= from && l.date <= to);
+                const perUnit = {};
+                logs.forEach(l => {
+                    const goal = data.goals.find(g => g.id === l.goal_id);
+                    if (goal && goal.unit !== 'hours' && l.amount) perUnit[goal.unit] = (perUnit[goal.unit] || 0) + Number(l.amount);
+                });
+                const hours = logs.reduce((s, l) => s + Number(l.hours), 0);
+                const habits = data.habits.filter(h => h.active);
+                let habitDays = 0;
+                habits.forEach(h => { for (let i = 0; i < 7; i++) if (habitDoneOn(h, addDays(to, -i)).done) habitDays++; });
+                const parts = [];
+                if (todos.length) parts.push(t('todosDone', { done: doneN, total: todos.length }));
+                Object.entries(perUnit).forEach(([u, v]) => parts.push(`+${num(v)} ${unitName(u)}`));
+                if (hours) parts.push(t('hoursLine', { n: num(hours) }));
+                if (habits.length) parts.push(t('habitsLine', { pct: Math.round((habitDays / (habits.length * 7)) * 100) }));
+                weeks.push(`<div class="week-row"><b>${esc(t('weekLine', { from: shortDay(from), to: shortDay(to) }))}</b>${esc(parts.join(' · ') || t('nothing'))}</div>`);
+            }
+            $('weeks').innerHTML = weeks.join('');
+        }
+
+        // ---------- sheets ----------
+        function openSheet(title, bodyHtml, actions) {
+            $('sheetTitle').textContent = title;
+            $('sheetBody').innerHTML = bodyHtml;
+            $('sheetError').classList.add('hidden');
+            const box = $('sheetActions');
+            box.innerHTML = '';
+            actions.forEach(a => {
+                const b = document.createElement('button');
+                b.type = 'button';
+                b.className = 'btn ' + (a.style || 'secondary');
+                b.textContent = a.label;
+                b.addEventListener('click', a.onClick);
+                box.appendChild(b);
+            });
+            $('sheetBackdrop').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            if (tg && tg.BackButton) {
+                sheetClose = closeSheet;
+                tg.BackButton.onClick(sheetClose);
+                tg.BackButton.show();
+            }
+        }
+        function closeSheet() {
+            $('sheetBackdrop').classList.add('hidden');
+            document.body.style.overflow = '';
+            if (tg && tg.BackButton && sheetClose) {
+                tg.BackButton.offClick(sheetClose);
+                tg.BackButton.hide();
+                sheetClose = null;
+            }
+        }
+        function sheetError(message) {
+            $('sheetError').textContent = message;
+            $('sheetError').classList.remove('hidden');
+        }
+        function busy(on) { document.querySelectorAll('#sheetActions button').forEach(b => { b.disabled = on; }); }
+        async function sheetMutate(body) {
+            busy(true);
+            const ok = await mutate(body, err => { sheetError(err.message); busy(false); });
+            if (ok) closeSheet();
+        }
+        const segmented = (name, options, value) =>
+            `<div class="segmented" data-seg="${name}">${options.map(([v, label]) => `<button type="button" data-value="${esc(v)}" class="${v === value ? 'active' : ''}">${esc(label)}</button>`).join('')}</div>`;
+        const segValue = (name) => { const b = document.querySelector(`[data-seg="${name}"] button.active`); return b ? b.dataset.value : null; };
+        const unitOptions = (selected, allowNone) =>
+            (allowNone ? [`<option value="">${esc(t('none'))}</option>`] : []).concat(UNITS.map(u => `<option value="${u}" ${u === selected ? 'selected' : ''}>${esc(unitName(u))}</option>`)).join('');
+
+        function editTodo(todo) {
+            openSheet(t('editTodo'), `
+                <div class="field"><label>${esc(t('taskTitle'))}</label><input id="fTitle" type="text" maxlength="300" value="${esc(todo.title)}"></div>
+                <div class="field"><label>${esc(t('date'))}</label><input id="fDate" type="date" dir="ltr" value="${esc(todo.date)}"></div>`, [
+                { label: t('delete'), style: 'danger', onClick: () => confirmBox(t('confirmDelete'), ok => ok && sheetMutate({ action: 'todo_delete', id: todo.id })) },
+                { label: t('cancel'), onClick: closeSheet },
+                { label: t('save'), style: 'primary', onClick: () => {
+                    const title = $('fTitle').value.trim();
+                    if (!title) return sheetError(t('required'));
+                    sheetMutate({ action: 'todo_update', id: todo.id, changes: { title, date: $('fDate').value || todo.date } });
+                } }
+            ]);
+        }
+
+        function newGoal() {
+            openSheet(t('newGoalTitle'), `
+                <div class="field"><label>${esc(t('kind'))}</label>${segmented('kind', ['book', 'course', 'project'].map(k => [k, `${L().icons[k]} ${L().kinds[k]}`]), 'book')}</div>
+                <div class="field"><label>${esc(t('name'))}</label><input id="fTitle" type="text" maxlength="200"></div>
+                <div class="row2">
+                    <div class="field"><label>${esc(t('total'))}</label><input id="fTotal" type="number" inputmode="decimal" min="1" dir="ltr"></div>
+                    <div class="field"><label>${esc(t('unit'))}</label><select id="fUnit">${unitOptions('pages')}</select></div>
+                </div>`, [
+                { label: t('cancel'), onClick: closeSheet },
+                { label: t('create'), style: 'primary', onClick: () => {
+                    const title = $('fTitle').value.trim();
+                    if (!title) return sheetError(t('required'));
+                    sheetMutate({ action: 'goal_create', kind: segValue('kind'), title, total: $('fTotal').value || null, unit: $('fUnit').value });
+                } }
+            ]);
+            document.querySelectorAll('[data-seg="kind"] button').forEach(b => b.addEventListener('click', () => { $('fUnit').value = DEFAULT_UNIT[b.dataset.value]; }));
+        }
+
+        function openGoal(goal, focusLog) {
+            const s = goal.stats || {};
+            const logs = logsFor(goal.id).slice().sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id).slice(0, 15);
+            const history = logs.map(l => `
+                <div class="log-row">
+                    <span>${esc(shortDay(l.date))}</span>
+                    <span class="num">${l.amount ? `${l.amount > 0 ? '+' : ''}${num(l.amount)} ${esc(unitName(goal.unit))}` : ''}${l.hours ? ` ⏱️ ${num(l.hours)}` : ''}</span>
+                    <button type="button" data-del-log="${l.id}" aria-label="delete">↩️</button>
+                </div>`).join('');
+            const statusButton = goal.status === 'active'
+                ? { label: t('pause'), onClick: () => sheetMutate({ action: 'goal_update', id: goal.id, changes: { status: 'paused' } }) }
+                : { label: goal.status === 'paused' ? t('resume') : t('reopen'), onClick: () => sheetMutate({ action: 'goal_update', id: goal.id, changes: { status: 'active' } }) };
+            openSheet(`${L().icons[goal.kind]} ${goal.title}`, `
+                <div class="hint num">${esc(goal.total ? t('progressOf', { p: num(s.progress), t: num(goal.total), unit: unitName(goal.unit) }) : `${num(s.progress)} ${unitName(goal.unit)}`)}</div>
+                <div class="divider"></div>
+                <h3>${esc(t('logTitle'))}</h3>
+                ${segmented('mode', [['add', t('modeAdd')], ['set', t('modeSet')]], 'add')}
+                <div class="row2" style="margin-top:8px">
+                    <div class="field"><label>${esc(t('amount'))} (${esc(unitName(goal.unit))})</label><input id="fAmount" type="number" inputmode="decimal" dir="ltr"></div>
+                    <div class="field"><label>${esc(t('hoursField'))}</label><input id="fHours" type="number" inputmode="decimal" min="0" step="0.25" dir="ltr"></div>
+                </div>
+                <button class="btn primary" type="button" id="logButton" style="width:100%">${esc(t('log'))}</button>
+                ${history ? `<div class="divider"></div><h3>${esc(t('historyTitle'))}</h3>${history}` : ''}
+                <div class="divider"></div>
+                <h3>${esc(t('editGoal'))}</h3>
+                <div class="field"><label>${esc(t('name'))}</label><input id="fTitle" type="text" maxlength="200" value="${esc(goal.title)}"></div>
+                <div class="row2">
+                    <div class="field"><label>${esc(t('total'))}</label><input id="fTotal" type="number" inputmode="decimal" min="1" dir="ltr" value="${goal.total ?? ''}"></div>
+                    <div class="field"><label>${esc(t('unit'))}</label><select id="fUnit">${unitOptions(goal.unit)}</select></div>
+                </div>`, [
+                { label: t('delete'), style: 'danger', onClick: () => confirmBox(t('confirmDelete'), ok => ok && sheetMutate({ action: 'goal_delete', id: goal.id })) },
+                statusButton,
+                ...(goal.status !== 'done' ? [{ label: t('markDone'), onClick: () => sheetMutate({ action: 'goal_update', id: goal.id, changes: { status: 'done' } }) }] : []),
+                { label: t('save'), style: 'primary', onClick: () => {
+                    const title = $('fTitle').value.trim();
+                    if (!title) return sheetError(t('required'));
+                    sheetMutate({ action: 'goal_update', id: goal.id, changes: { title, total: $('fTotal').value || null, unit: $('fUnit').value } });
+                } }
+            ]);
+            $('logButton').addEventListener('click', () => {
+                const amount = $('fAmount').value;
+                const hours = $('fHours').value;
+                if (!amount && !hours) return sheetError(t('amount'));
+                sheetMutate({ action: 'goal_log', id: goal.id, amount: amount === '' ? null : Number(amount), mode: segValue('mode'), hours: hours === '' ? null : Number(hours) });
+            });
+            $('sheetBody').querySelectorAll('[data-del-log]').forEach(b => b.addEventListener('click', () =>
+                confirmBox(t('confirmDelete'), ok => ok && sheetMutate({ action: 'log_delete', id: Number(b.dataset.delLog) }))));
+            if (focusLog) setTimeout(() => $('fAmount').focus(), 50);
+        }
+
+        function habitForm(habit) {
+            return `
+                <div class="field"><label>${esc(t('name'))}</label><input id="fTitle" type="text" maxlength="200" value="${esc(habit ? habit.title : '')}"></div>
+                <div class="row2">
+                    <div class="field"><label>${esc(t('target'))}</label><input id="fTarget" type="number" inputmode="decimal" min="1" dir="ltr" value="${habit && habit.target ? habit.target : ''}"></div>
+                    <div class="field"><label>${esc(t('unit'))}</label><select id="fUnit">${unitOptions(habit ? habit.unit : '', true)}</select></div>
+                </div>`;
+        }
+
+        function newHabit() {
+            openSheet(t('newHabitTitle'), habitForm(null), [
+                { label: t('cancel'), onClick: closeSheet },
+                { label: t('create'), style: 'primary', onClick: () => {
+                    const title = $('fTitle').value.trim();
+                    if (!title) return sheetError(t('required'));
+                    sheetMutate({ action: 'habit_create', title, target: $('fTarget').value || null, unit: $('fUnit').value || null });
+                } }
+            ]);
+        }
+
+        function editHabit(habit) {
+            openSheet(t('editHabit'), habitForm(habit), [
+                { label: t('delete'), style: 'danger', onClick: () => confirmBox(t('confirmDelete'), ok => ok && sheetMutate({ action: 'habit_delete', id: habit.id })) },
+                { label: habit.active ? t('pause') : t('resume'), onClick: () => sheetMutate({ action: 'habit_update', id: habit.id, changes: { active: !habit.active } }) },
+                { label: t('save'), style: 'primary', onClick: () => {
+                    const title = $('fTitle').value.trim();
+                    if (!title) return sheetError(t('required'));
+                    sheetMutate({ action: 'habit_update', id: habit.id, changes: { title, target: $('fTarget').value || null, unit: $('fUnit').value || null } });
+                } }
+            ]);
+        }
+
+        // ---------- language ----------
+        function applyLanguage() {
+            const dir = state.lang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = state.lang;
+            document.documentElement.dir = dir;
+            document.body.dir = dir;
+            document.title = t('title');
+            $('title').textContent = t('title');
+            $('toAccounting').textContent = t('accounting');
+            $('tasksTabLabel').textContent = t('tasks');
+            $('langButton').textContent = t('langButton');
+            $('refreshButton').setAttribute('aria-label', t('refresh'));
+            $('loadingText').textContent = t('loading');
+            $('retryButton').textContent = t('retry');
+            $('newTodo').placeholder = t('addPlaceholder');
+            $('newTodoDay').innerHTML = `<option value="0">${esc(t('dayToday'))}</option><option value="1">${esc(t('dayTomorrow'))}</option>`;
+            const labels = { today: 'tabToday', goals: 'tabGoals', habits: 'tabHabits', history: 'tabHistory' };
+            document.querySelectorAll('#tabs button').forEach(b => { b.textContent = t(labels[b.dataset.tab]); });
+        }
+
+        // ---------- events ----------
+        document.querySelectorAll('#tabs button').forEach(b => b.addEventListener('click', () => {
+            state.tab = b.dataset.tab;
+            prefs.set('tasks.tab', state.tab);
+            haptic('select');
+            render();
+        }));
+
+        document.addEventListener('click', e => {
+            if (!data) return;
+            const el = e.target.closest('[data-toggle],[data-edit-todo],[data-goal],[data-log-goal],[data-habit-check],[data-edit-habit]');
+            if (!el || el.closest('#sheetBackdrop')) return;
+            if (el.dataset.toggle) {
+                const todo = data.todos.find(x => x.id === Number(el.dataset.toggle));
+                if (!todo) return;
+                const status = todo.status === 'done' ? 'open' : 'done';
+                todo.status = status; // show it right away
+                haptic('select');
+                render();
+                mutate({ action: 'todo_update', id: todo.id, changes: { status } }, err => { alertError(err); load(true); });
+            } else if (el.dataset.editTodo) {
+                const todo = data.todos.find(x => x.id === Number(el.dataset.editTodo));
+                if (todo) editTodo(todo);
+            } else if (el.dataset.logGoal) {
+                e.stopPropagation();
+                const goal = data.goals.find(g => g.id === Number(el.dataset.logGoal));
+                if (goal) openGoal(goal, true);
+            } else if (el.dataset.goal) {
+                const goal = data.goals.find(g => g.id === Number(el.dataset.goal));
+                if (goal) openGoal(goal, false);
+            } else if (el.dataset.habitCheck) {
+                const habit = data.habits.find(h => h.id === Number(el.dataset.habitCheck));
+                if (!habit) return;
+                const done = habitDoneOn(habit, data.today).done;
+                haptic('select');
+                mutate({ action: 'habit_check', id: habit.id, date: data.today, done: !done });
+            } else if (el.dataset.editHabit) {
+                const habit = data.habits.find(h => h.id === Number(el.dataset.editHabit));
+                if (habit) editHabit(habit);
+            }
+        });
+
+        $('addTodoForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const title = $('newTodo').value.trim();
+            if (!title || !data) return;
+            const date = addDays(data.today, Number($('newTodoDay').value));
+            $('newTodo').value = '';
+            await mutate({ action: 'todo_add', title, date }, err => { $('newTodo').value = title; alertError(err); });
+        });
+        $('newGoalButton').addEventListener('click', newGoal);
+        $('newHabitButton').addEventListener('click', newHabit);
+        $('sheetBackdrop').addEventListener('click', e => { if (e.target === $('sheetBackdrop')) closeSheet(); });
+        $('sheetBody').addEventListener('click', e => {
+            const b = e.target.closest('.segmented button');
+            if (!b) return;
+            b.parentElement.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b));
+        });
+        $('refreshButton').addEventListener('click', () => load(!!data));
+        $('retryButton').addEventListener('click', () => load(false));
+        $('langButton').addEventListener('click', () => {
+            state.lang = state.lang === 'ar' ? 'en' : 'ar';
+            prefs.set('dash.lang', state.lang);
+            applyLanguage();
+            if (data) render();
+        });
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && data && Date.now() - loadedAt > 30000) load(true);
+        });
+        if (tg && tg.onEvent) tg.onEvent('activated', () => { if (data && Date.now() - loadedAt > 30000) load(true); });
+
+        // ---------- start ----------
+        $('userInfo').textContent = `👤 ${(tgUser && (tgUser.username || tgUser.first_name)) || '—'}`;
+        if (!['today', 'goals', 'habits', 'history'].includes(state.tab)) state.tab = 'today';
+        applyLanguage();
+        load(false);
+    </script>
+</body>
+</html>
